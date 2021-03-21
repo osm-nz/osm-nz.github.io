@@ -3,6 +3,7 @@
   <head>
     <title>LINZ Address Import</title>
     <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="./img/logo.png" />
     <style>
       * {
         font-family: Arial, Helvetica, sans-serif;
@@ -12,11 +13,33 @@
         border-collapse: collapse;
         border: 1px solid #000;
       }
+      .start {
+        display: block;
+      }
+      .start {
+        background-color: #1e90ff;
+        color: #fff;
+        padding: 1em 1.5em;
+        text-decoration: none;
+        text-transform: uppercase;
+        width: fit-content;
+        margin: 10px auto;
+      }
+
+      .start:hover {
+        background-color: #555;
+      }
+
+      .start:active {
+        background-color: #000;
+      }
     </style>
   </head>
   <body>
+    <a href="./RapiD/" class="start">✨ Click to start mapping</a>
     <table>
       <tr style="font-weight: 800">
+        <td>Code</td>
         <td>Data Category</td>
         <td>No. of addresses</td>
         <td>Percentage of total</td>
@@ -28,13 +51,30 @@
     <p></p>
 
     <footer>
-      For more infomation, see
-      <a
-        href="https://wiki.openstreetmap.org/wiki/Import/New_Zealand_Street_Addresses_(2021)"
-        >the wiki page</a
-      >
-      and
-      <a href="https://github.com/osm-nz/linz-address-import">the repository</a>
+      For more infomation, see:
+      <ul>
+        <li>
+          <a
+            href="https://wiki.openstreetmap.org/wiki/Import/New_Zealand_Street_Addresses_(2021)"
+            >the wiki page</a
+          >
+        </li>
+        <li>
+          <a href="https://github.com/osm-nz/linz-address-import"
+            >the repository containing the source code</a
+          >
+        </li>
+        <li>
+          <a href="https://osmcha.org/?aoi=5a4d6cbe-37f9-4b5b-a6d6-0c69dd488a07"
+            >All changesets uploaded so far</a
+          >
+        </li>
+        <li>
+          <a href="https://github.com/osm-nz/linz-address-import/issues/1"
+            >The import progress</a
+          >
+        </li>
+      </ul>
     </footer>
     <script>
       const CDN_BASE_URL = "https://linz-addr-cdn.kyle.kiwi";
@@ -43,78 +83,94 @@
           CDN_BASE_URL + "/stats.json"
         ).then((r) => r.json());
 
-        document.querySelector("p").innerHTML =
-          "Statistics last updated on " + new Date(date);
+        const d = new Date(date);
+        const hours = Math.round((+new Date() - +d) / 1000 / 60 / 60);
+        document.querySelector(
+          "p"
+        ).innerHTML = `Statistics last updated on ${d.toLocaleString()} (${hours} hours ago)`;
 
         const META = {
-          PERFECT: ["Data is already perfect", "No action required"],
+          PERFECT: [1, "Data is already perfect", "No action required"],
           EXISTS_BUT_WRONG_DATA: [
+            2,
             "Address exists but the data is wrong",
             "TBC",
             "data-wrong.txt",
           ],
           EXISTS_BUT_NO_LINZ_REF: [
+            3,
             "Address exists but no linz ref",
             "TBC",
             "needs-linz-ref.txt",
           ],
           MULTIPLE_EXIST_BUT_NO_LINZ_REF: [
+            4,
             "Multiple addresses exists, none have linz ref",
             "TBC",
             "needs-linz-ref-but-multiple.txt",
           ],
           MULTIPLE_EXIST: [
+            5,
             "Multiple addresses exists with same linz ref",
-            "TBC",
+            "manual action required",
             "duplicate-linz-ref.txt",
           ],
-          TOTALLY_MISSING: [
-            "Addresses totally missing from OSM",
-            '<a href="./RapiD/">✨ Click to start mapping</a>',
-          ],
-          NEEDS_DELETE: [
-            "Addresses in OSM that have been deleted by LINZ",
-            "As above, select a suburb. Addresses to be deleted will be shown in red.",
-            "needs-delete.txt",
-          ],
           EXISTS_BUT_LOCATION_WRONG: [
+            6,
             "Addresses exist but location is very wrong",
-            'As above but select the suburb called "ZZ Special Location Wrong".',
+            'Select the suburb called "ZZ Special Location Wrong".',
             "location-wrong.txt",
           ],
-          UNKNOWN_ERROR: [
-            "Unknown Error",
-            "Something went wrong during conflating that the system doesn't understand.",
-            "unknown-error.txt",
+          TOTALLY_MISSING: [
+            7,
+            "Addresses totally missing from OSM",
+            "Select a suburb in the tool",
+          ],
+          NEEDS_DELETE: [
+            8,
+            "Addresses in OSM that have been deleted by LINZ",
+            "Select a suburb in the tool. Addresses to be deleted will be shown in red.",
+            "needs-delete.txt",
           ],
           NEEDS_DELETE_NON_TRIVIAL: [
+            9,
             "Addresses in OSM that have been deleted by LINZ, but are on a OSM building or business",
             "manual action required",
             "needs-delete-non-trivial.txt",
           ],
           CORRUPT: [
+            10,
             "There are multiple LINZ refs on the same OSM node",
             "manual action required",
             "corrupt.txt",
           ],
           LINZ_REF_CHANGED: [
+            11,
             "LINZ has changed their ID for an address, but not the data",
-            "manual action required",
+            "Select the suburb called 'ZZ Special Linz Ref Changed'",
             "linz-ref-changed.txt",
+          ],
+          UNKNOWN_ERROR: [
+            12,
+            "Unknown Error",
+            "Something went wrong during conflating that the system doesn't understand.",
+            "unknown-error.txt",
           ],
         };
 
         const table = document.querySelector("table");
 
         for (const status in count) {
+          const [n, category, howToAction, rawFile] = META[status];
           table.innerHTML += `<tr>
-            <td>${META[status][0]}</td>
+            <td>${n}</td>
+            <td>${category}</td>
             <td>${count[status].toLocaleString()}</td>
             <td>${((count[status] / total) * 100).toFixed(2)}%</td>
-            <td>${META[status][1]}</td>
+            <td>${howToAction}</td>
             ${
-              META[status][2]
-                ? `<td><a href="${CDN_BASE_URL}/${META[status][2]}">download</a></td>`
+              rawFile
+                ? `<td><a href="${CDN_BASE_URL}/${rawFile}">download</a></td>`
                 : ""
             }
           </tr>`;
