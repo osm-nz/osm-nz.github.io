@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>All datasets</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="./img/logo.png" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin
+    ></script>
+    <style>
+      * {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      #map {
+        width: 100vw;
+        height: 80vh;
+      }
+      body {
+        overflow-x: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside></aside>
+    <script>
+      function bboxToPoly([[minLng, minLat], [maxLng, maxLat]]) {
+        if (!minLng || !minLat || !maxLng || !maxLat) return false;
+        return [
+          [maxLat, minLng], // NW
+          [maxLat, maxLng], // NE
+          [minLat, maxLng], // SE
+          [minLat, minLng], // SW
+        ];
+      }
+      var map = L.map("map").setView([-40.98, 166.9], 6);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+
+      fetch("https://linz-addr-cdn.kyle.kiwi/index.json")
+        .then((r) => r.json())
+        .then((d) => {
+          const [hide, show] = d.results.reduce(
+            (ac, x) => {
+              // hide anything that spans more than 1deg of lat or lng
+              const isBig =
+                x.extent[1][0] - x.extent[0][0] > 1 ||
+                x.extent[1][1] - x.extent[0][1] > 1;
+
+              ac[+!isBig].push(x);
+              return ac;
+            },
+            [[], []]
+          );
+
+          document.querySelector("aside").innerHTML = `${
+            hide.length
+          } heinously large datasets have been hidden from the map: <ul>${hide
+            .map((x) => `<li>${x.name}</li>`)
+            .join("")}<ul>`;
+
+          show.forEach((x) => {
+            const poly = bboxToPoly(x.extent);
+            if (poly)
+              L.polygon(poly, {
+                color:
+                  x.groupCategories[0] === "/Categories/Preview"
+                    ? "red"
+                    : "blue",
+              })
+                .addTo(map)
+                .bindPopup(x.name);
+          });
+        })
+        .catch((ex) => {
+          console.error(ex);
+          alert("Failed to load map");
+        });
+    </script>
+  </body>
+</html>
