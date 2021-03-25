@@ -69,7 +69,7 @@
           document.querySelector("aside").innerHTML = `${
             hide.length
           } heinously large datasets have been hidden from the map: <ul>${hide
-            .map((x) => `<li>${x.name}</li>`)
+            .map((x) => `<li>${x.name} - ${x.snippet}</li>`)
             .join("")}<ul>`;
 
           show.forEach((x) => {
@@ -82,7 +82,7 @@
                     : "blue",
               })
                 .addTo(map)
-                .bindPopup(x.name);
+                .bindPopup(`${x.name} (${x.snippet})`);
           });
         })
         .catch((ex) => {

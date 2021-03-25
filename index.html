@@ -90,26 +90,28 @@
         const hours = Math.round((+new Date() - +d) / 1000 / 60 / 60);
         document.querySelector(
           "p"
-        ).innerHTML = `Statistics last updated on ${d.toLocaleString()} (${hours} hours ago)`;
+        ).innerHTML = `Statistics last updated on ${d.toLocaleString(
+          "en-nz"
+        )} (${hours} hours ago)`;
 
         const META = {
           PERFECT: [1, "Data is already perfect", "No action required"],
           EXISTS_BUT_WRONG_DATA: [
             2,
             "Address exists but the data is wrong",
-            "TBC",
+            "Select a suburb in the tool, edits will be shown",
             "data-wrong.txt",
           ],
           EXISTS_BUT_NO_LINZ_REF: [
             3,
             "Address exists but no linz ref",
-            "Select a suburb from the list with a suffix of 'Add LINZ Ref' ",
+            "Select a suburb in the tool, edits will be shown",
             "needs-linz-ref.txt",
           ],
           MULTIPLE_EXIST_BUT_NO_LINZ_REF: [
             4,
             "Multiple addresses exists, none have linz ref",
-            "TBC",
+            "manual action required",
             "needs-linz-ref-but-multiple.txt",
           ],
           MULTIPLE_EXIST: [
@@ -168,7 +170,7 @@
           table.innerHTML += `<tr>
             <td>${n}</td>
             <td>${category}</td>
-            <td>${count[status].toLocaleString()}</td>
+            <td>${count[status].toLocaleString("en-nz")}</td>
             <td>${((count[status] / total) * 100).toFixed(2)}%</td>
             <td>${howToAction}</td>
             ${
