@@ -28,12 +28,62 @@
       body {
         overflow-x: hidden;
       }
+      .legend {
+          line-height: 18px;
+          color: #555;
+      }
+      .legend i {
+          width: 18px;
+          height: 18px;
+          float: left;
+          margin-right: 8px;
+          opacity: 0.7;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
     <aside></aside>
     <script>
+
+      function getPolygon(x){
+        var color = x.groupCategories[0] === "/Categories/Preview" ? "red" : getColor(x.totalCount);
+        var fillOpacity = 0.3;
+        var stroke = true;
+        var opacity = 1;
+        var weight = 2;
+
+        return {
+          'color': color,
+          'fillOpacity': fillOpacity,
+          'opacity': opacity,
+          'stroke': stroke,
+          'weight': weight,
+        };
+      }
+
+      var beforeHoveredColor = "orange"; // store colour of the hovered polygon
+      function toggleFeatureHighlight(e, on) { // highlight polygon on mouse hover
+        if (on) {
+          beforeHoveredColor = e.target.options['color'];
+          e.target.setStyle({'color': 'yellow'}); 
+        } else {
+          e.target.setStyle({'color': beforeHoveredColor});
+        } 
+      }
+      
+      // Return a deeper red for changesets with more changes
+      function getColor(d) {
+          return d > 1000 ? '#3a0000' :
+                d > 500 ? '#67001f' :
+                d > 200  ? '#980043' :
+                d > 100  ? '#ce1256' :
+                d > 60  ? '#e7298a' :
+                d > 40   ? '#df65b0' :
+                d > 20   ? '#c994c7' :
+                            '#d4b9da';
+      }
+	
       function bboxToPoly([[minLng, minLat], [maxLng, maxLat]]) {
         if (!minLng || !minLat || !maxLng || !maxLat) return false;
         return [
@@ -72,23 +122,54 @@
             .map((x) => `<li>${x.name} - ${x.snippet}</li>`)
             .join("")}<ul>`;
 
+          
           show.forEach((x) => {
             const poly = bboxToPoly(x.extent);
-            if (poly)
-              L.polygon(poly, {
-                color:
-                  x.groupCategories[0] === "/Categories/Preview"
-                    ? "red"
-                    : "blue",
-              })
+            if (poly) {
+              var label = L.popup()
+                .setLatLng(x.extent[0])
+                .setContent(`<strong>${x.name}</strong><br>${x.snippet}}`);
+                // .openOn(map);
+              L.polygon(poly, getPolygon(x))
                 .addTo(map)
-                .bindPopup(`${x.name} (${x.snippet})`);
+                .bindPopup(label)
+                .bindTooltip(`<strong>${x.name}</strong><br>${x.snippet}}`)
+                .on('mouseover', function(ev){
+                  toggleFeatureHighlight(ev, true);
+                })
+                .on('mouseout', function(ev){
+                  toggleFeatureHighlight(ev, false);
+                });
+            }
           });
         })
         .catch((ex) => {
           console.error(ex);
           alert("Failed to load map");
         });
+
+      // Legend
+      var legend = L.control({position: 'bottomleft', margin: '20px'});
+
+      legend.onAdd = function (map) {
+
+          var div = L.DomUtil.create('div', 'info legend'),
+              grades = [0, 20, 40, 60, 100, 200, 500, 1000],
+              labels = [];
+
+            div.innerHTML = '<strong># of changes</strong><br/>';
+
+          // loop through our density intervals and generate a label with a colored square for each interval
+          for (var i = 0; i < grades.length; i++) {
+              div.innerHTML +=
+                  '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                  grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+          }
+
+          return div;
+      };
+
+      legend.addTo(map);
     </script>
   </body>
 </html>
