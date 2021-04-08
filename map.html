@@ -25,22 +25,22 @@
         width: 100vw;
         height: 80vh;
       }
-      #from-rapid-msg { 
+      #from-rapid-msg {
         text-align: center;
       }
       body {
         overflow-x: hidden;
       }
       .legend {
-          line-height: 18px;
-          color: #555;
+        line-height: 18px;
+        color: #555;
       }
       .legend i {
-          width: 18px;
-          height: 18px;
-          display: inline-block;
-          margin-right: 8px;
-          opacity: 0.7;
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+        margin-right: 8px;
+        opacity: 0.7;
       }
     </style>
   </head>
@@ -58,10 +58,12 @@
       function returnToRapiD(id, locked) {
         if (locked) {
           const [user, minutesAgo] = locked;
-          const suffix = "Check back in a day.\n\nIf you continue, you might override or duplicate their work!"
-          const msg = minutesAgo === 'done'
-            ? `This dataset may already have been uploaded by someone else! ${suffix}`
-            : `Someone else (${user}) started editing ${d.id} ${minutesAgo} minutes ago. ${suffix}`;
+          const suffix =
+            "Check back in a day.\n\nIf you continue, you might override or duplicate their work!";
+          const msg =
+            minutesAgo === "done"
+              ? `This dataset may already have been uploaded by someone else! ${suffix}`
+              : `Someone else (${user}) started editing ${d.id} ${minutesAgo} minutes ago. ${suffix}`;
 
           if (!confirm(msg)) return;
         }
@@ -75,45 +77,54 @@
       }
 
       function getPolygon(x, isLocked) {
-        const color = x.groupCategories[0] === "/Categories/Preview" 
-          ? "#0033ff"
-          : isLocked
-          ? "#aaaaaa"
-          : getColor(x.totalCount);
+        const color =
+          x.groupCategories[0] === "/Categories/Preview"
+            ? "#0033ff"
+            : isLocked
+            ? "#aaaaaa"
+            : getColor(x.totalCount);
         var fillOpacity = 0.3;
         var stroke = true;
         var opacity = 1;
         var weight = 2;
 
         return {
-          'color': color,
-          'fillOpacity': fillOpacity,
-          'opacity': opacity,
-          'stroke': stroke,
-          'weight': weight,
+          color: color,
+          fillOpacity: fillOpacity,
+          opacity: opacity,
+          stroke: stroke,
+          weight: weight,
         };
       }
 
       var beforeHoveredColor = "orange"; // store colour of the hovered polygon
-      function toggleFeatureHighlight(e, on) { // highlight polygon on mouse hover
+      function toggleFeatureHighlight(e, on) {
+        // highlight polygon on mouse hover
         if (on) {
-          beforeHoveredColor = e.target.options['color'];
-          e.target.setStyle({'color': 'yellow'});
+          beforeHoveredColor = e.target.options["color"];
+          e.target.setStyle({ color: "yellow" });
         } else {
-          e.target.setStyle({'color': beforeHoveredColor});
+          e.target.setStyle({ color: beforeHoveredColor });
         }
       }
 
       // Return a deeper red for changesets with more changes
       function getColor(d) {
-          return d > 1000 ? '#3a0000' :
-                d > 500 ? '#67001f' :
-                d > 200  ? '#980043' :
-                d > 100  ? '#ce1256' :
-                d > 60  ? '#e7298a' :
-                d > 40   ? '#df65b0' :
-                d > 20   ? '#c994c7' :
-                            '#d4b9da';
+        return d > 1000
+          ? "#3a0000"
+          : d > 500
+          ? "#67001f"
+          : d > 200
+          ? "#980043"
+          : d > 100
+          ? "#ce1256"
+          : d > 60
+          ? "#e7298a"
+          : d > 40
+          ? "#df65b0"
+          : d > 20
+          ? "#c994c7"
+          : "#d4b9da";
       }
 
       function bboxToPoly([[minLng, minLat], [maxLng, maxLat]]) {
@@ -132,7 +143,7 @@
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      const baseUrl = "https://linz-addr-cdn.kyle.kiwi"
+      const baseUrl = "https://linz-addr-cdn.kyle.kiwi";
       Promise.all([
         fetch(`${baseUrl}/index.json`).then((r) => r.json()),
         fetch(`${baseUrl}/__locked`).then((r) => r.json()),
@@ -151,43 +162,56 @@
             [[], []]
           );
 
-          const getLockedMsg = x => locked[x.id]
-            ? `<br />Someone else ${
-                locked[x.id][1] === "done"
-                  ? "may have already uploaded"
-                  : "is working on"
-              } this dataset! Check back in one day.`
-            : "";
+          const getLockedMsg = (x) =>
+            locked[x.id]
+              ? `<br />Someone else ${
+                  locked[x.id][1] === "done"
+                    ? "may have already uploaded"
+                    : "is working on"
+                } this dataset! Check back in one day.`
+              : "";
 
           document.querySelector("aside").innerHTML = `${
             hide.length
           } heinously large datasets have been hidden from the map: <ul>${hide
             .map((x) =>
               fromRapiD
-                ? `<li><a href="#" onClick='returnToRapiD("${x.id}", ${JSON.stringify(locked[x.id])})''>${x.name}</a> - ${x.snippet} ${getLockedMsg(x)}</li>`
+                ? `<li><a href="#" onClick='returnToRapiD("${
+                    x.id
+                  }", ${JSON.stringify(locked[x.id])})''>${x.name}</a> - ${
+                    x.snippet
+                  } ${getLockedMsg(x)}</li>`
                 : `<li>${x.name} - ${x.snippet} ${getLockedMsg(x)}</li>`
             )
             .join("")}</ul>`;
-
 
           show.forEach((x) => {
             const poly = bboxToPoly(x.extent);
             if (poly) {
               var label = L.popup()
                 .setLatLng(x.extent[0])
-                .setContent(`<strong>${x.name}</strong><br>${x.snippet} ${getLockedMsg(x)}`);
-                // .openOn(map);
+                .setContent(
+                  `<strong>${x.name}</strong><br>${x.snippet} ${getLockedMsg(
+                    x
+                  )}`
+                );
+              // .openOn(map);
               const polygon = L.polygon(poly, getPolygon(x, locked[x.id]))
                 .addTo(map)
-                .bindTooltip(`<strong>${x.name}</strong><br>${x.snippet} ${getLockedMsg(x)}`)
-                .on('mouseover', function(ev){
+                .bindTooltip(
+                  `<strong>${x.name}</strong><br>${x.snippet} ${getLockedMsg(
+                    x
+                  )}`
+                )
+                .on("mouseover", function (ev) {
                   toggleFeatureHighlight(ev, true);
                 })
-                .on('mouseout', function(ev){
+                .on("mouseout", function (ev) {
                   toggleFeatureHighlight(ev, false);
                 });
 
-              if (fromRapiD) polygon.on("click", () => returnToRapiD(x.id, locked[x.id]));
+              if (fromRapiD)
+                polygon.on("click", () => returnToRapiD(x.id, locked[x.id]));
               else polygon.bindPopup(label);
             }
           });
@@ -198,24 +222,26 @@
         });
 
       // Legend
-      var legend = L.control({position: 'bottomleft', margin: '20px'});
+      var legend = L.control({ position: "bottomleft", margin: "20px" });
 
       legend.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "info legend"),
+          grades = [0, 20, 40, 60, 100, 200, 500, 1000],
+          labels = [];
 
-          var div = L.DomUtil.create('div', 'info legend'),
-              grades = [0, 20, 40, 60, 100, 200, 500, 1000],
-              labels = [];
+        div.innerHTML = "<strong># of changes</strong><br/>";
 
-            div.innerHTML = '<strong># of changes</strong><br/>';
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+          div.innerHTML +=
+            '<i style="background:' +
+            getColor(grades[i] + 1) +
+            '"></i> ' +
+            grades[i] +
+            (grades[i + 1] ? "&ndash;" + grades[i + 1] + "<br>" : "+");
+        }
 
-          // loop through our density intervals and generate a label with a colored square for each interval
-          for (var i = 0; i < grades.length; i++) {
-              div.innerHTML +=
-                  '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-                  grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-          }
-
-          return div;
+        return div;
       };
 
       legend.addTo(map);
