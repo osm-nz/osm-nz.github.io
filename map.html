@@ -35,7 +35,7 @@
       .legend i {
           width: 18px;
           height: 18px;
-          float: left;
+          display: inline-block;
           margin-right: 8px;
           opacity: 0.7;
       }
@@ -66,12 +66,12 @@
       function toggleFeatureHighlight(e, on) { // highlight polygon on mouse hover
         if (on) {
           beforeHoveredColor = e.target.options['color'];
-          e.target.setStyle({'color': 'yellow'}); 
+          e.target.setStyle({'color': 'yellow'});
         } else {
           e.target.setStyle({'color': beforeHoveredColor});
-        } 
+        }
       }
-      
+
       // Return a deeper red for changesets with more changes
       function getColor(d) {
           return d > 1000 ? '#3a0000' :
@@ -83,7 +83,7 @@
                 d > 20   ? '#c994c7' :
                             '#d4b9da';
       }
-	
+
       function bboxToPoly([[minLng, minLat], [maxLng, maxLat]]) {
         if (!minLng || !minLat || !maxLng || !maxLat) return false;
         return [
@@ -120,20 +120,20 @@
             hide.length
           } heinously large datasets have been hidden from the map: <ul>${hide
             .map((x) => `<li>${x.name} - ${x.snippet}</li>`)
-            .join("")}<ul>`;
+            .join("")}</ul>`;
 
-          
+
           show.forEach((x) => {
             const poly = bboxToPoly(x.extent);
             if (poly) {
               var label = L.popup()
                 .setLatLng(x.extent[0])
-                .setContent(`<strong>${x.name}</strong><br>${x.snippet}}`);
+                .setContent(`<strong>${x.name}</strong><br>${x.snippet}`);
                 // .openOn(map);
               L.polygon(poly, getPolygon(x))
                 .addTo(map)
                 .bindPopup(label)
-                .bindTooltip(`<strong>${x.name}</strong><br>${x.snippet}}`)
+                .bindTooltip(`<strong>${x.name}</strong><br>${x.snippet}`)
                 .on('mouseover', function(ev){
                   toggleFeatureHighlight(ev, true);
                 })
