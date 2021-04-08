@@ -25,6 +25,9 @@
         width: 100vw;
         height: 80vh;
       }
+      #from-rapid-msg { 
+        text-align: center;
+      }
       body {
         overflow-x: hidden;
       }
@@ -42,9 +45,21 @@
     </style>
   </head>
   <body>
+    <h3 id="from-rapid-msg" hidden>Please select a suburb to edit</h3>
     <div id="map"></div>
     <aside></aside>
     <script>
+      // if rapid has opened this page in a popup
+      const fromRapiD = !!window.opener;
+
+      function returnToRapiD(id) {
+        window.opener.postMessage(`ADD_SECTOR=${id}`);
+        window.close();
+      }
+
+      if (fromRapiD) {
+        document.querySelector("#from-rapid-msg").hidden = false;
+      }
 
       function getPolygon(x){
         var color = x.groupCategories[0] === "/Categories/Preview" ? "red" : getColor(x.totalCount);
@@ -119,7 +134,11 @@
           document.querySelector("aside").innerHTML = `${
             hide.length
           } heinously large datasets have been hidden from the map: <ul>${hide
-            .map((x) => `<li>${x.name} - ${x.snippet}</li>`)
+            .map((x) =>
+              fromRapiD
+                ? `<li><a onClick="returnToRapiD('${x.id}')">${x.name}</a> - ${x.snippet}</li>`
+                : `<li>${x.name} - ${x.snippet}</li>`
+            )
             .join("")}</ul>`;
 
 
@@ -130,9 +149,8 @@
                 .setLatLng(x.extent[0])
                 .setContent(`<strong>${x.name}</strong><br>${x.snippet}`);
                 // .openOn(map);
-              L.polygon(poly, getPolygon(x))
+              const polygon = L.polygon(poly, getPolygon(x))
                 .addTo(map)
-                .bindPopup(label)
                 .bindTooltip(`<strong>${x.name}</strong><br>${x.snippet}`)
                 .on('mouseover', function(ev){
                   toggleFeatureHighlight(ev, true);
@@ -140,6 +158,9 @@
                 .on('mouseout', function(ev){
                   toggleFeatureHighlight(ev, false);
                 });
+
+              if (fromRapiD) polygon.on("click", () => returnToRapiD(x.id));
+              else polygon.bindPopup(label);
             }
           });
         })
