@@ -45,14 +45,27 @@
     </style>
   </head>
   <body>
-    <h3 id="from-rapid-msg" hidden>Please select a suburb to edit</h3>
+    <div id="from-rapid-msg" hidden>
+      <h3>Please select a suburb to edit</h3>
+      You can close this page and use the list if you prefer
+    </div>
     <div id="map"></div>
     <aside></aside>
     <script>
       // if rapid has opened this page in a popup
       const fromRapiD = !!window.opener;
 
-      function returnToRapiD(id) {
+      function returnToRapiD(id, locked) {
+        if (locked) {
+          const [user, minutesAgo] = locked;
+          const suffix = "Check back in a day.\n\nIf you continue, you might override or duplicate their work!"
+          const msg = minutesAgo === 'done'
+            ? `This dataset may already have been uploaded by someone else! ${suffix}`
+            : `Someone else (${user}) started editing ${d.id} ${minutesAgo} minutes ago. ${suffix}`;
+
+          if (!confirm(msg)) return;
+        }
+
         window.opener.postMessage(`ADD_SECTOR=${id}`);
         window.close();
       }
@@ -61,8 +74,12 @@
         document.querySelector("#from-rapid-msg").hidden = false;
       }
 
-      function getPolygon(x){
-        var color = x.groupCategories[0] === "/Categories/Preview" ? "red" : getColor(x.totalCount);
+      function getPolygon(x, isLocked) {
+        const color = x.groupCategories[0] === "/Categories/Preview" 
+          ? "#0033ff"
+          : isLocked
+          ? "#aaaaaa"
+          : getColor(x.totalCount);
         var fillOpacity = 0.3;
         var stroke = true;
         var opacity = 1;
@@ -115,9 +132,12 @@
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      fetch("https://linz-addr-cdn.kyle.kiwi/index.json")
-        .then((r) => r.json())
-        .then((d) => {
+      const baseUrl = "https://linz-addr-cdn.kyle.kiwi"
+      Promise.all([
+        fetch(`${baseUrl}/index.json`).then((r) => r.json()),
+        fetch(`${baseUrl}/__locked`).then((r) => r.json()),
+      ])
+        .then(([d, locked]) => {
           const [hide, show] = d.results.reduce(
             (ac, x) => {
               // hide anything that spans more than 1deg of lat or lng
@@ -131,13 +151,21 @@
             [[], []]
           );
 
+          const getLockedMsg = x => locked[x.id]
+            ? `<br />Someone else ${
+                locked[x.id][1] === "done"
+                  ? "may have already uploaded"
+                  : "is working on"
+              } this dataset! Check back in one day.`
+            : "";
+
           document.querySelector("aside").innerHTML = `${
             hide.length
           } heinously large datasets have been hidden from the map: <ul>${hide
             .map((x) =>
               fromRapiD
-                ? `<li><a onClick="returnToRapiD('${x.id}')">${x.name}</a> - ${x.snippet}</li>`
-                : `<li>${x.name} - ${x.snippet}</li>`
+                ? `<li><a href="#" onClick='returnToRapiD("${x.id}", ${JSON.stringify(locked[x.id])})''>${x.name}</a> - ${x.snippet} ${getLockedMsg(x)}</li>`
+                : `<li>${x.name} - ${x.snippet} ${getLockedMsg(x)}</li>`
             )
             .join("")}</ul>`;
 
@@ -147,11 +175,11 @@
             if (poly) {
               var label = L.popup()
                 .setLatLng(x.extent[0])
-                .setContent(`<strong>${x.name}</strong><br>${x.snippet}`);
+                .setContent(`<strong>${x.name}</strong><br>${x.snippet} ${getLockedMsg(x)}`);
                 // .openOn(map);
-              const polygon = L.polygon(poly, getPolygon(x))
+              const polygon = L.polygon(poly, getPolygon(x, locked[x.id]))
                 .addTo(map)
-                .bindTooltip(`<strong>${x.name}</strong><br>${x.snippet}`)
+                .bindTooltip(`<strong>${x.name}</strong><br>${x.snippet} ${getLockedMsg(x)}`)
                 .on('mouseover', function(ev){
                   toggleFeatureHighlight(ev, true);
                 })
@@ -159,7 +187,7 @@
                   toggleFeatureHighlight(ev, false);
                 });
 
-              if (fromRapiD) polygon.on("click", () => returnToRapiD(x.id));
+              if (fromRapiD) polygon.on("click", () => returnToRapiD(x.id, locked[x.id]));
               else polygon.bindPopup(label);
             }
           });
