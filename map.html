@@ -63,7 +63,7 @@
           const msg =
             minutesAgo === "done"
               ? `This dataset may already have been uploaded by someone else! ${suffix}`
-              : `Someone else (${user}) started editing ${d.id} ${minutesAgo} minutes ago. ${suffix}`;
+              : `Someone else (${user}) started editing ${id} ${minutesAgo} minutes ago. ${suffix}`;
 
           if (!confirm(msg)) return;
         }
