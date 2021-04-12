@@ -63,7 +63,7 @@
           const msg =
             minutesAgo === "done"
               ? `This dataset may already have been uploaded by someone else! ${suffix}`
-              : `Someone else (${user}) started editing ${id} ${minutesAgo} minutes ago. ${suffix}`;
+              : `Someone else (${user}) started editing this dataset ${minutesAgo} minutes ago. ${suffix}`;
 
           if (!confirm(msg)) return;
         }
@@ -153,6 +153,9 @@
         .then(([d, locked]) => {
           const [hide, show] = d.results.reduce(
             (ac, x) => {
+              // don't show preview datasets on the map
+              if (x.groupCategories[0] === "/Categories/Preview") return ac;
+
               // hide anything that spans more than 1deg of lat or lng
               const isBig =
                 x.extent[1][0] - x.extent[0][0] > 1 ||
@@ -180,7 +183,7 @@
               fromRapiD
                 ? `<li><a href="#" onClick='returnToRapiD("${
                     x.id
-                  }", ${JSON.stringify(locked[x.id])})''>${x.name}</a> - ${
+                  }", ${JSON.stringify(locked[x.id])})'>${x.name}</a> - ${
                     x.snippet
                   } ${getLockedMsg(x)}</li>`
                 : `<li>${x.name} - ${x.snippet} ${getLockedMsg(x)}</li>`
