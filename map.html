@@ -176,19 +176,21 @@
                 } this dataset! Check back in one day.`
               : "";
 
-          document.querySelector("aside").innerHTML = `${
-            hide.length
-          } heinously large datasets have been hidden from the map: <ul>${hide
-            .map((x) =>
-              fromRapiD
-                ? `<li><a href="#" onClick='returnToRapiD("${
-                    x.id
-                  }", ${JSON.stringify(locked[x.id])})'>${x.name}</a> - ${
-                    x.snippet
-                  } ${getLockedMsg(x)}</li>`
-                : `<li>${x.name} - ${x.snippet} ${getLockedMsg(x)}</li>`
-            )
-            .join("")}</ul>`;
+          if (hide.length) {
+            document.querySelector("aside").innerHTML = `${
+              hide.length
+            } heinously large datasets have been hidden from the map: <ul>${hide
+              .map((x) =>
+                fromRapiD
+                  ? `<li><a href="#" onClick='returnToRapiD("${
+                      x.id
+                    }", ${JSON.stringify(locked[x.id])})'>${x.name}</a> - ${
+                      x.snippet
+                    } ${getLockedMsg(x)}</li>`
+                  : `<li>${x.name} - ${x.snippet} ${getLockedMsg(x)}</li>`
+              )
+              .join("")}</ul>`;
+          }
 
           show.forEach((x) => {
             const poly = bboxToPoly(x.extent);
