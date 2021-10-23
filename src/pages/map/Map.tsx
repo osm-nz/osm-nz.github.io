@@ -128,10 +128,6 @@ export const Map: React.VFC = () => {
   const [data, setData] = useState<Data>();
 
   useEffect(() => {
-    if (true) {
-      setData(JSON.parse(localStorage.a));
-      return;
-    }
     Promise.all([
       fetch(`${baseUrl}/index.json`).then((r) => r.json()),
       fetch(`${baseUrl}/__locked`)
