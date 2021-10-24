@@ -120,6 +120,11 @@ function bboxToPoly([[minLng, minLat], [maxLng, maxLat]]: BBox): [
     [minLat, minLng], // SW
   ];
 }
+const headers = {
+  Expires: 'Tue, 01 Jan 1980 1:00:00 GMT',
+  'Cache-Control': 'no-cache, no-store, max-age=0',
+  Pragma: 'no-cache',
+};
 
 export const Map: React.VFC = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -129,8 +134,10 @@ export const Map: React.VFC = () => {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${baseUrl}/index.json`).then((r) => r.json()),
-      fetch(`${baseUrl}/__locked`)
+      fetch(`${baseUrl}/index.json?nocache=${Math.random()}`, { headers }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${baseUrl}/__locked?nocache=${Math.random()}`, { headers })
         .then((r) => r.json())
         .catch(() => ({})),
     ])
