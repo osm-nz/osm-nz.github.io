@@ -5,13 +5,13 @@ const META = {
   EXISTS_BUT_WRONG_DATA: [
     2,
     'Address exists but the data is wrong',
-    'Select a suburb in the tool, edits will be shown',
+    'Select a suburb in the tool',
     'data-wrong.txt',
   ],
   EXISTS_BUT_NO_LINZ_REF: [
     3,
     'Address exists but no linz ref',
-    'Select a suburb in the tool, edits will be shown',
+    'Select a suburb in the tool',
     'needs-linz-ref.txt',
   ],
   MULTIPLE_EXIST_BUT_NO_LINZ_REF: [
@@ -40,12 +40,12 @@ const META = {
   NEEDS_DELETE: [
     8,
     'Addresses in OSM that have been deleted by LINZ',
-    'Select a suburb in the tool. Addresses to be deleted will be shown in red.',
+    'Select a suburb in the tool',
     'needs-delete.txt',
   ],
   NEEDS_DELETE_NON_TRIVIAL: [
     9,
-    'Addresses in OSM that have been deleted by LINZ, but are on a OSM building or business',
+    'Addresses in OSM that have been deleted by LINZ, but are on a OSM business/POI',
     'manual action required',
     'needs-delete-non-trivial.txt',
   ],
@@ -66,6 +66,12 @@ const META = {
     'Addresses in OSM that are perfect, but the flats/units could be stacked if this is desired.',
     'N/A. Just for statistics',
     'could-be-stacked.txt',
+  ],
+  NEEDS_DELETE_ON_BUILDING: [
+    14,
+    'Addresses in OSM that have been deleted by LINZ, but are on a OSM building',
+    'Select a suburb in the tool',
+    'needs-delete-on-building.txt',
   ],
 };
 
