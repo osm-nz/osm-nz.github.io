@@ -73,6 +73,12 @@ const META = {
     'Select a suburb in the tool',
     'needs-delete-on-building.txt',
   ],
+  REPLACED_BY_BUILDING: [
+    15,
+    'Addresses in OSM that exist twice - once on a building and once on an imported node',
+    'Select a suburb in the tool',
+    'replaced-by-building.txt',
+  ],
 };
 
 const CDN_BASE_URL = 'https://linz-addr-cdn.kyle.kiwi';
