@@ -5051,10 +5051,10 @@ fast-levenshtein@^2.0.6, fast-levenshtein@~2.0.6:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fast-xml-parser@^4.0.0-beta.8:
-  version "4.0.0-beta.8"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-4.0.0-beta.8.tgz#f0004e29f0eb105e45fbf3f69f2d206a6bfdc587"
-  integrity sha512-2QEZ/WRt6mfrguLsluhvpTWNxdKYgvdZx3dA+Tnx0pUmlEA4ZWt32qSmA1sR1jXscFozHIKqZrikUeiCYSe3ow==
+fast-xml-parser@^4.0.7:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-4.0.7.tgz#570a0f3754f259a8e5e7a85e7c667401e15e4872"
+  integrity sha512-dMtibyus3kC7nbxj1CpVtysLzO13UOAZEFAb5vpQg3T4O6qvetmSePpXKFx5KPNCHKoGwjtgjfF5DOyn7s1ylQ==
   dependencies:
     strnum "^1.0.5"
 
@@ -7937,12 +7937,12 @@ os-browserify@^0.3.0:
   resolved "https://registry.yarnpkg.com/os-browserify/-/os-browserify-0.3.0.tgz#854373c7f5c2315914fc9bfc6bd8238fdda1ec27"
   integrity sha1-hUNzx/XCMVkU/Jv8a9gjj92h7Cc=
 
-osm-api@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-1.0.0.tgz#ef25690278f28eec3a714d9836e0165b949f6f61"
-  integrity sha512-SlY0TCz3tukrNsXqSTBjdFxuBPYPjM8g/wWT2dvuUt/kPw8d7DZck+A9tQB+VYrAAk1APQnFUMGzirkZ3oSuiw==
+osm-api@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-1.0.3.tgz#1e4eda334d63f051aeaf120832046b6e8096eb77"
+  integrity sha512-5ioaAmnoSQbLroS9eqPYxIAqM2ykZ6Yhqbmz70brLMQcooKQD+4QBAFk7Y/4yplYpESO56L+vB2mfHKGzt8uoA==
   dependencies:
-    fast-xml-parser "^4.0.0-beta.8"
+    fast-xml-parser "^4.0.7"
     isomorphic-fetch "^3.0.0"
 
 p-each-series@^2.1.0:
