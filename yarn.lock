@@ -7937,10 +7937,10 @@ os-browserify@^0.3.0:
   resolved "https://registry.yarnpkg.com/os-browserify/-/os-browserify-0.3.0.tgz#854373c7f5c2315914fc9bfc6bd8238fdda1ec27"
   integrity sha1-hUNzx/XCMVkU/Jv8a9gjj92h7Cc=
 
-osm-api@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-1.0.3.tgz#1e4eda334d63f051aeaf120832046b6e8096eb77"
-  integrity sha512-5ioaAmnoSQbLroS9eqPYxIAqM2ykZ6Yhqbmz70brLMQcooKQD+4QBAFk7Y/4yplYpESO56L+vB2mfHKGzt8uoA==
+osm-api@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-1.0.4.tgz#4f8326861d6f450ee7969d91c40be58c1d319b6e"
+  integrity sha512-p788s674TWUCaWvCWSbs9Ddbotk4HZ6JK1Th66n5FmsoBQxElwYhU+kFJascEUN5DCMubDVcrBW+LwukFl8D4w==
   dependencies:
     fast-xml-parser "^4.0.7"
     isomorphic-fetch "^3.0.0"
