@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 import { StrictMode, useEffect, useState } from 'react';
-import { Home, Map, Upload, WrappedWhatsup } from './pages';
+import { Home, Map, Upload, WrappedWhatsup, HistoryRestorer } from './pages';
 
 import './index.css';
 
@@ -18,6 +18,7 @@ const App: React.VFC = () => {
   if (path === '/whatsup') return <WrappedWhatsup />;
   if (path === '/upload') return <Upload />;
   if (path === '/map') return <Map />;
+  if (path === '/restore-history') return <HistoryRestorer />;
 
   // all other routes: show home page
   return <Home />;

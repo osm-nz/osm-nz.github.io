@@ -1,0 +1,43 @@
+.main {
+  max-width: 600px;
+  margin: 16px auto;
+  text-align: center;
+}
+
+.list {
+  text-align: center;
+}
+
+.item {
+  display: flex;
+  justify-content: space-around;
+
+  background: #f2f2f2;
+  padding: 8px;
+  margin: 8px;
+  border-radius: 4px;
+}
+
+.error {
+  color: #f36;
+}
+
+.btn {
+  padding: 8px;
+  border: 1px solid #999;
+  border-radius: 4px;
+}
+.btn:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+.smallInput {
+  padding: 4px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  margin-left: 2px;
+}
+
+.saveBtn {
+  background-color: #f36;
+}

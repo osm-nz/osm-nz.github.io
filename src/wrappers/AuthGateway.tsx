@@ -54,6 +54,7 @@ export const AuthGateway: React.FC = ({ children }) => {
     logout();
     setLoggedIn(false);
     setUser(undefined);
+    setError(undefined);
   }, []);
 
   const ctx = useMemo(
@@ -70,6 +71,9 @@ export const AuthGateway: React.FC = ({ children }) => {
         <br />
         <button type="button" onClick={onClickLogin}>
           Try Again
+        </button>
+        <button type="button" onClick={onLogout}>
+          Logout
         </button>
       </>
     );

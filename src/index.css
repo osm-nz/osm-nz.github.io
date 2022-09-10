@@ -58,6 +58,7 @@ a {
 }
 a:not(.start):hover {
   color: #1e40ff;
+  cursor: pointer;
 }
 a:not(.start):visited {
   color: #1e20ff;
@@ -101,7 +102,7 @@ button.active-layer {
 button.preview-layer {
   background: #fdd6df;
 }
-button:hover {
+button.inactive-layer:hover {
   background: #1e9;
 }
 
