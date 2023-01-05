@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { MapContainer, Polygon, Tooltip } from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 import { uniqBy } from '../../helpers';
@@ -121,7 +121,7 @@ const headers = {
   Pragma: 'no-cache',
 };
 
-export const Map: React.VFC = () => {
+export const Map: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [layer, setLayer] = useState<string>();
   const [error, setError] = useState();
@@ -147,7 +147,7 @@ export const Map: React.VFC = () => {
     'name',
     data[0].results
       .map((t) => ({
-        name: t.name.split(' - ')[0],
+        name: t.name.split(' - ').slice(0, -1).join(' - '),
         isPreview: t.groupCategories[0] === '/Categories/Preview',
       }))
       .filter((x) => showPreview || !x.isPreview),
@@ -208,6 +208,7 @@ export const Map: React.VFC = () => {
             .filter((x) => x.name.startsWith(layer))
             .map((x) => (
               <Polygon
+                key={x.id}
                 pathOptions={getPolygon(x, data[1][x.id])}
                 positions={bboxToPoly(x.extent)}
                 eventHandlers={{
@@ -234,7 +235,7 @@ export const Map: React.VFC = () => {
           <strong># of changes</strong>
           <br />
           {[0, 20, 40, 60, 100, 200, 500, 1000].map((_, i, grades) => (
-            <>
+            <Fragment key={_}>
               <i style={{ background: getColor(grades[i] + 1) }} />
               {grades[i]}
               {grades[i + 1] ? (
@@ -245,7 +246,7 @@ export const Map: React.VFC = () => {
               ) : (
                 '+'
               )}
-            </>
+            </Fragment>
           ))}
         </div>
       </MapContainer>

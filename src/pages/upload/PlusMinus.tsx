@@ -1,6 +1,6 @@
 import { OsmChange } from 'osm-api';
 
-export const PlusMinus: React.VFC<{ diff: OsmChange }> = ({ diff }) => {
+export const PlusMinus: React.FC<{ diff: OsmChange }> = ({ diff }) => {
   return (
     <div style={{ padding: 4, color: '#fff' }}>
       <span style={{ background: '#4caf50', padding: 4 }}>

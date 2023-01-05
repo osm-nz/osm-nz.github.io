@@ -7,7 +7,7 @@ import classes from './HistoryRestorer.module.css';
 
 const NEW_FEATURE = (): Item => ({ type: 'n' });
 
-const SelectNWR: React.VFC<{ value: NWR; onChange(newVal: NWR): void }> = ({
+const SelectNWR: React.FC<{ value: NWR; onChange(newVal: NWR): void }> = ({
   value,
   onChange,
 }) => {
@@ -24,7 +24,7 @@ const SelectNWR: React.VFC<{ value: NWR; onChange(newVal: NWR): void }> = ({
   );
 };
 
-const HistoryRestorerInner: React.VFC = () => {
+const HistoryRestorerInner: React.FC = () => {
   const { user, logout } = useContext(AuthContext);
 
   const [items, setItems] = useState<Item[]>([NEW_FEATURE()]);
@@ -222,7 +222,7 @@ const HistoryRestorerInner: React.VFC = () => {
   );
 };
 
-export const HistoryRestorer: React.VFC = () => (
+export const HistoryRestorer: React.FC = () => (
   <AuthGateway>
     <HistoryRestorerInner />
   </AuthGateway>

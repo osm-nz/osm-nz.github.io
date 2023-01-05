@@ -1,6 +1,6 @@
 import { TileLayer, LayersControl } from 'react-leaflet';
 
-export const Layers: React.VFC = () => (
+export const Layers: React.FC = () => (
   <LayersControl position="topright">
     <LayersControl.BaseLayer checked name="OpenStreetMap">
       <TileLayer

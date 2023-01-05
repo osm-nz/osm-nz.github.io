@@ -1,12 +1,12 @@
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { StrictMode, useEffect, useState } from 'react';
 import { Home, Map, Upload, WrappedWhatsup, HistoryRestorer } from './pages';
 
 import './index.css';
 
-const getCurrentRoute = () => window.location.hash.substr(1);
+const getCurrentRoute = () => window.location.hash.slice(1);
 
-const App: React.VFC = () => {
+const App: React.FC = () => {
   const [path, setPath] = useState<string>(getCurrentRoute());
 
   useEffect(() => {
@@ -24,9 +24,8 @@ const App: React.VFC = () => {
   return <Home />;
 };
 
-ReactDOM.render(
+createRoot(document.querySelector('main')!).render(
   <StrictMode>
     <App />
   </StrictMode>,
-  document.querySelector('main'),
 );

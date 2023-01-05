@@ -121,7 +121,7 @@ const renderSimpleSection = (
     );
   });
 
-export const TagChanges: React.VFC<{ diff: OsmChange }> = ({ diff }) => {
+export const TagChanges: React.FC<{ diff: OsmChange }> = ({ diff }) => {
   const [error, setError] = useState<Error>();
   const [changes, setChanges] = useState<Change>();
 

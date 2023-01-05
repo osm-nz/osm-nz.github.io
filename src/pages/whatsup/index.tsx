@@ -1,1 +1,1 @@
-export const WrappedWhatsup: React.VFC = () => <>Hello!</>;
+export const WrappedWhatsup: React.FC = () => <>Hello!</>;

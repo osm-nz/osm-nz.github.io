@@ -30,7 +30,7 @@ function getCsBbox(osmChange: OsmChange) {
   return bbox;
 }
 
-export const MapPreview: React.VFC<{ diff: OsmChange }> = ({ diff }) => {
+export const MapPreview: React.FC<{ diff: OsmChange }> = ({ diff }) => {
   const polygonGroup = useRef<IFeatureGroup>(null);
 
   const bbox = getCsBbox(diff);
@@ -38,7 +38,7 @@ export const MapPreview: React.VFC<{ diff: OsmChange }> = ({ diff }) => {
     <MapContainer
       style={{ width: 500, height: 500 }}
       scrollWheelZoom
-      whenCreated={(map) => map.fitBounds(polygonGroup.current!.getBounds())}
+      ref={(map) => map!.fitBounds(polygonGroup.current!.getBounds())}
     >
       <Layers />
 

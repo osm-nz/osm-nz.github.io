@@ -4,6 +4,7 @@ import {
   useCallback,
   useMemo,
   useEffect,
+  PropsWithChildren,
 } from 'react';
 import { getUser, isLoggedIn, login, logout, OsmOwnUser } from 'osm-api';
 
@@ -13,7 +14,7 @@ type IAuthContext = {
 };
 export const AuthContext = createContext({} as IAuthContext);
 
-export const AuthGateway: React.FC = ({ children }) => {
+export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());

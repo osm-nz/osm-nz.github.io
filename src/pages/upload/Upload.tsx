@@ -46,7 +46,7 @@ const tagsToStr = (tags: Record<string, string>): string =>
     .map((v) => v.join('='))
     .join('\n');
 
-const UploadInner: React.VFC = () => {
+const UploadInner: React.FC = () => {
   const { user, logout } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(false);
@@ -163,7 +163,7 @@ const UploadInner: React.VFC = () => {
   );
 };
 
-export const Upload: React.VFC = () => (
+export const Upload: React.FC = () => (
   <AuthGateway>
     <UploadInner />
   </AuthGateway>

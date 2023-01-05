@@ -89,7 +89,7 @@ type Data = {
   total: number;
 };
 
-export const Home: React.VFC = () => {
+export const Home: React.FC = () => {
   const [error, setError] = useState<Error>();
   const [data, setData] = useState<Data>();
 
