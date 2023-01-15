@@ -1,7 +1,7 @@
 import { OsmChange, OsmNode } from 'osm-api';
 import { useRef } from 'react';
 import { FeatureGroup, MapContainer, Polygon } from 'react-leaflet';
-import type { FeatureGroup as IFeatureGroup } from 'leaflet';
+import { FeatureGroup as IFeatureGroup, LatLngBounds } from 'leaflet';
 import { Layers } from '../map/Layers';
 
 /**
@@ -33,12 +33,26 @@ function getCsBbox(osmChange: OsmChange) {
 export const MapPreview: React.FC<{ diff: OsmChange }> = ({ diff }) => {
   const polygonGroup = useRef<IFeatureGroup>(null);
 
+  // TODO: react hook to download all nodes of ways/relations that were touched
+  // for small features. Render each feature on the map
   const bbox = getCsBbox(diff);
+
+  if (Object.values(bbox).some((n) => !Number.isFinite(n))) {
+    return <>No preview available</>;
+  }
+
   return (
     <MapContainer
-      style={{ width: 500, height: 500 }}
+      style={{ width: 500, height: 500, margin: 'auto' }}
       scrollWheelZoom
-      ref={(map) => map!.fitBounds(polygonGroup.current!.getBounds())}
+      ref={(map) =>
+        map?.fitBounds(
+          new LatLngBounds(
+            [bbox.minLat, bbox.minLng],
+            [bbox.maxLat, bbox.maxLng],
+          ),
+        )
+      }
     >
       <Layers />
 

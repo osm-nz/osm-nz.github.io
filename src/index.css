@@ -95,7 +95,7 @@ button.inactive-layer {
   padding: 4px;
 }
 button.active-layer {
-  background: #1e9;
+  background: #1e9 !important;
   border: 0;
   padding: 4px;
 }

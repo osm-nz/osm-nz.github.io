@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { getFeatures, OsmChange, OsmFeature, OsmFeatureType } from 'osm-api';
 
 type SimpleRecord = {
@@ -9,9 +9,7 @@ type Change = {
   added: SimpleRecord;
   removed: SimpleRecord;
   featureDeleted: SimpleRecord;
-  changed: {
-    [key: string]: { [toFromValue: string]: number };
-  };
+  changed: SimpleRecord;
 };
 
 async function calcTagChanges(diff: OsmChange): Promise<Change> {
@@ -45,13 +43,9 @@ async function calcTagChanges(diff: OsmChange): Promise<Change> {
   }
 
   // the next bit requires calling the API to get the old version of each feature
-  const toFetch = diff.modify.reduce(
-    (ac, f) => ({
-      ...ac,
-      [f.type]: [...(ac[f.type] || []), f.id],
-    }),
-    {} as Record<OsmFeatureType, number[] | undefined>,
-  );
+  const toFetch = diff.modify.reduce<
+    Partial<Record<OsmFeatureType, number[] | undefined>>
+  >((ac, f) => ({ ...ac, [f.type]: [...(ac[f.type] || []), f.id] }), {});
 
   const features = [
     ...(toFetch.node ? await getFeatures('node', toFetch.node) : []),
@@ -96,17 +90,22 @@ async function calcTagChanges(diff: OsmChange): Promise<Change> {
   return out;
 }
 
-const renderSimpleSection = (
-  list: SimpleRecord,
-  prefix: string,
-  color: string,
-) =>
+const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
   Object.entries(list).map(([key, vals]) => {
     const tags = Object.entries(vals);
-    return (
-      <li key={prefix + key} style={{ color }}>
-        {prefix} <code>{key}=</code>
-        {tags.length > 1 ? (
+
+    let children: React.ReactNode;
+    if (tags.length > 1) {
+      const allAre1 = tags.every(([, count]) => count === 1);
+      if (allAre1) {
+        children = tags.map(([val], i) => (
+          <Fragment key={val}>
+            {!!i && '/'}
+            <code>{val}</code>
+          </Fragment>
+        ));
+      } else {
+        children = (
           <ul>
             {tags.map(([val, count]) => (
               <li key={val}>
@@ -114,9 +113,15 @@ const renderSimpleSection = (
               </li>
             ))}
           </ul>
-        ) : (
-          <code>{tags[0][0]}</code>
-        )}
+        );
+      }
+    } else {
+      children = <code>{tags[0][0]}</code>;
+    }
+    return (
+      <li key={prefix + key} className={prefix}>
+        {prefix} <code>{key}=</code>
+        {children}
       </li>
     );
   });
@@ -132,14 +137,17 @@ export const TagChanges: React.FC<{ diff: OsmChange }> = ({ diff }) => {
   if (error) return <>Failed to calculate tag changes</>;
   if (!changes) return <>Loading tag changes...</>;
 
-  console.log('c', changes);
+  const noChanges = Object.values(changes).every((x) => !Object.keys(x).length);
+  if (noChanges) {
+    return <div className="alert error">No tags changed!</div>;
+  }
 
   return (
-    <ul>
-      {renderSimpleSection(changes.added, 'Added', 'green')}
-      {renderSimpleSection(changes.changed, 'Changed', 'orange')}
-      {renderSimpleSection(changes.removed, 'Removed', 'red')}
-      {renderSimpleSection(changes.featureDeleted, 'Deleted', 'maroon')}
+    <ul className="tagChanges">
+      {renderSimpleSection(changes.added, 'Added')}
+      {renderSimpleSection(changes.changed, 'Changed')}
+      {renderSimpleSection(changes.removed, 'Removed')}
+      {renderSimpleSection(changes.featureDeleted, 'Deleted')}
     </ul>
   );
 };
