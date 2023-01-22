@@ -94,6 +94,7 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
   Object.entries(list).map(([key, vals]) => {
     const tags = Object.entries(vals);
 
+    let keyCount: React.ReactNode;
     let children: React.ReactNode;
     if (tags.length > 1) {
       const allAre1 = tags.every(([, count]) => count === 1);
@@ -104,6 +105,7 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
             <code>{val}</code>
           </Fragment>
         ));
+        keyCount = ` (${tags.length})`;
       } else {
         children = (
           <ul>
@@ -114,13 +116,16 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
             ))}
           </ul>
         );
+        keyCount = '';
       }
     } else {
       children = <code>{tags[0][0]}</code>;
+      keyCount = ` (${tags[0][1]})`;
     }
     return (
       <li key={prefix + key} className={prefix}>
-        {prefix} <code>{key}=</code>
+        {prefix}
+        {keyCount} <code>{key}=</code>
         {children}
       </li>
     );

@@ -3,6 +3,7 @@ import { MapContainer, Polygon, Tooltip } from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 import { uniqBy } from '../../helpers';
 import { Layers } from './Layers';
+import { MapErrorBoundary } from './MapErrorBoundary';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -195,61 +196,63 @@ export const Map: React.FC = () => {
           ))}
         </div>
       </div>
-      <MapContainer
-        style={{ width: '100vw', height: 'calc(100vh - 200px)' }}
-        center={[-40.98, 166.9]}
-        zoom={6}
-        scrollWheelZoom
-      >
-        <Layers />
-
-        {layer &&
-          data[0].results
-            .filter((x) => x.name.startsWith(layer))
-            .map((x) => (
-              <Polygon
-                key={x.id}
-                pathOptions={getPolygon(x, data[1][x.id])}
-                positions={bboxToPoly(x.extent)}
-                eventHandlers={{
-                  click: () => {
-                    if (fromRapiD) returnToRapiD(x.id, data[1][x.id]);
-                  },
-                  mouseover: (ev) => toggleFeatureHighlight(ev, true),
-                  mouseout: (ev) => toggleFeatureHighlight(ev, false),
-                }}
-              >
-                <Tooltip direction="bottom" sticky>
-                  <strong>{x.name}</strong>
-                  <br />
-                  {x.snippet}
-                  <br />
-                  {getLockedMsg(x)}
-                </Tooltip>
-              </Polygon>
-            ))}
-        <div
-          className="legend leaflet-bottom leaflet-left"
-          style={{ margin: 20 }}
+      <MapErrorBoundary key={layer}>
+        <MapContainer
+          style={{ width: '100vw', height: 'calc(100vh - 200px)' }}
+          center={[-40.98, 166.9]}
+          zoom={6}
+          scrollWheelZoom
         >
-          <strong># of changes</strong>
-          <br />
-          {[0, 20, 40, 60, 100, 200, 500, 1000].map((_, i, grades) => (
-            <Fragment key={_}>
-              <i style={{ background: getColor(grades[i] + 1) }} />
-              {grades[i]}
-              {grades[i + 1] ? (
-                <>
-                  &ndash;{grades[i + 1]}
-                  <br />
-                </>
-              ) : (
-                '+'
-              )}
-            </Fragment>
-          ))}
-        </div>
-      </MapContainer>
+          <Layers />
+
+          {layer &&
+            data[0].results
+              .filter((x) => x.name.startsWith(layer))
+              .map((x) => (
+                <Polygon
+                  key={x.id}
+                  pathOptions={getPolygon(x, data[1][x.id])}
+                  positions={bboxToPoly(x.extent)}
+                  eventHandlers={{
+                    click: () => {
+                      if (fromRapiD) returnToRapiD(x.id, data[1][x.id]);
+                    },
+                    mouseover: (ev) => toggleFeatureHighlight(ev, true),
+                    mouseout: (ev) => toggleFeatureHighlight(ev, false),
+                  }}
+                >
+                  <Tooltip direction="bottom" sticky>
+                    <strong>{x.name}</strong>
+                    <br />
+                    {x.snippet}
+                    <br />
+                    {getLockedMsg(x)}
+                  </Tooltip>
+                </Polygon>
+              ))}
+          <div
+            className="legend leaflet-bottom leaflet-left"
+            style={{ margin: 20 }}
+          >
+            <strong># of changes</strong>
+            <br />
+            {[0, 20, 40, 60, 100, 200, 500, 1000].map((_, i, grades) => (
+              <Fragment key={_}>
+                <i style={{ background: getColor(grades[i] + 1) }} />
+                {grades[i]}
+                {grades[i + 1] ? (
+                  <>
+                    &ndash;{grades[i + 1]}
+                    <br />
+                  </>
+                ) : (
+                  '+'
+                )}
+              </Fragment>
+            ))}
+          </div>
+        </MapContainer>
+      </MapErrorBoundary>
     </>
   );
 };

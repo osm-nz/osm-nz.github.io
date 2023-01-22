@@ -41,6 +41,8 @@ const DEPRECATED_TAGS: Record<string, true | Record<string, true>> = {
   'LINZ2OSM:source_version': true,
   'LINZ:source_version': true,
   'LINZ:dataset': true,
+  'brand:wikipedia': true,
+  'operator:wikipedia': true,
 };
 
 function* chunk<T>(arr: T[], limit: number): Generator<T[], void> {
