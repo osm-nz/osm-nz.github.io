@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { getFeatures, OsmChange, OsmFeature, OsmFeatureType } from 'osm-api';
+import { chunk } from './util';
 
 type SimpleRecord = {
   [key: string]: { [value: string]: number };
@@ -47,19 +48,24 @@ async function calcTagChanges(diff: OsmChange): Promise<Change> {
     Partial<Record<OsmFeatureType, number[] | undefined>>
   >((ac, f) => ({ ...ac, [f.type]: [...(ac[f.type] || []), f.id] }), {});
 
-  const features = [
-    ...(toFetch.node ? await getFeatures('node', toFetch.node) : []),
-    ...(toFetch.way ? await getFeatures('way', toFetch.way) : []),
-    ...(toFetch.relation
-      ? await getFeatures('relation', toFetch.relation)
-      : []),
-  ];
-
   const oldVersions: Record<string, OsmFeature> = {};
-  for (const f of features) oldVersions[f.type + f.id] = f;
+  for (const _type in toFetch) {
+    const type = _type as OsmFeatureType;
+    const unchunked = toFetch[type];
+    if (unchunked) {
+      for (const ids of chunk(unchunked, 100)) {
+        console.log(`Fetching ${ids.length} ${type}s...`);
+        const features = await getFeatures(type, ids);
+        for (const feature of features) {
+          const nwrId = feature.type[0] + feature.id;
+          oldVersions[nwrId] = feature;
+        }
+      }
+    }
+  }
 
   for (const f of diff.modify) {
-    const oldTags = oldVersions[f.type + f.id].tags || {};
+    const oldTags = oldVersions[f.type[0] + f.id].tags || {};
     const newTags = f.tags || {};
     const allKeys = Object.keys({ ...oldTags, ...newTags });
     for (const key of allKeys) {

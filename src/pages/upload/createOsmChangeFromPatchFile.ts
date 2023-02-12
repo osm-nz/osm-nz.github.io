@@ -10,6 +10,7 @@ import {
   OsmWay,
 } from 'osm-api';
 import { MAP, NWR } from '../HistoryRestorer/util';
+import { chunk } from './util';
 
 const TEMPLATE_OSM_FEATURE: Omit<OsmFeature, 'id' | 'type'> = {
   // crap that just gets ignored by the API for new features
@@ -44,12 +45,6 @@ const DEPRECATED_TAGS: Record<string, true | Record<string, true>> = {
   'brand:wikipedia': true,
   'operator:wikipedia': true,
 };
-
-function* chunk<T>(arr: T[], limit: number): Generator<T[], void> {
-  for (let i = 0; i < arr.length; i += limit) {
-    yield arr.slice(i, i + limit);
-  }
-}
 
 const nextId: Record<OsmFeatureType, number> = {
   node: -1,

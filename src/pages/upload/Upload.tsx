@@ -109,6 +109,7 @@ const UploadInner: React.FC = () => {
       setResult(await uploadChangeset(parsedTags!, diff!));
       // reset inputs but don't reset the changeset tags
       setDiff(undefined);
+      console.log('Uploaded!');
     } catch (ex) {
       console.error(ex);
       setError(ex instanceof Error ? ex : new Error(`${ex}`));
