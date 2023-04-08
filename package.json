@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@ideditor/country-coder": "^5.1.0",
+    "diff": "^5.1.0",
     "leaflet": "^1.9.3",
     "osm-api": "^1.0.5",
     "react": "^18.2.0",
@@ -11,6 +12,7 @@
     "react-leaflet": "^4.2.0"
   },
   "devDependencies": {
+    "@types/diff": "^5.0.3",
     "@types/geojson": "^7946.0.10",
     "@types/leaflet": "^1.9.0",
     "@types/node": "^18.11.18",
@@ -27,7 +29,10 @@
     "build": "react-scripts build"
   },
   "eslintConfig": {
-    "extends": "kyle"
+    "extends": "kyle",
+    "rules": {
+      "no-lonely-if": "off"
+    }
   },
   "prettier": "eslint-config-kyle/prettier",
   "browserslist": [

@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { getFeatures, OsmChange, OsmFeature, OsmFeatureType } from 'osm-api';
-import { chunk } from './util';
+import { Fragment, useEffect, useState } from 'react';
+import { OsmChange } from 'osm-api';
+import { FetchCache, ToFetch, fetchChunked } from './util';
 
 type SimpleRecord = {
   [key: string]: { [value: string]: number };
@@ -13,7 +13,10 @@ type Change = {
   changed: SimpleRecord;
 };
 
-async function calcTagChanges(diff: OsmChange): Promise<Change> {
+async function calcTagChanges(
+  diff: OsmChange,
+  fetchCache: FetchCache | undefined,
+): Promise<Change> {
   const out: Change = {
     added: {},
     removed: {},
@@ -44,25 +47,14 @@ async function calcTagChanges(diff: OsmChange): Promise<Change> {
   }
 
   // the next bit requires calling the API to get the old version of each feature
-  const toFetch = diff.modify.reduce<
-    Partial<Record<OsmFeatureType, number[] | undefined>>
-  >((ac, f) => ({ ...ac, [f.type]: [...(ac[f.type] || []), f.id] }), {});
+  const toFetch = diff.modify.reduce<ToFetch>(
+    (ac, f) => ({ ...ac, [f.type]: [...ac[f.type], f.id] }),
+    { node: [], way: [], relation: [] },
+  );
 
-  const oldVersions: Record<string, OsmFeature> = {};
-  for (const _type in toFetch) {
-    const type = _type as OsmFeatureType;
-    const unchunked = toFetch[type];
-    if (unchunked) {
-      for (const ids of chunk(unchunked, 100)) {
-        console.log(`Fetching ${ids.length} ${type}s...`);
-        const features = await getFeatures(type, ids);
-        for (const feature of features) {
-          const nwrId = feature.type[0] + feature.id;
-          oldVersions[nwrId] = feature;
-        }
-      }
-    }
-  }
+  // if this is an osmPatch, then we will have already fetched this data from the API,
+  // so we re-use the existing fetchCache
+  const oldVersions = await fetchChunked(toFetch, fetchCache);
 
   for (const f of diff.modify) {
     const oldTags = oldVersions[f.type[0] + f.id].tags || {};
@@ -137,13 +129,16 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
     );
   });
 
-export const TagChanges: React.FC<{ diff: OsmChange }> = ({ diff }) => {
+export const TagChanges: React.FC<{
+  diff: OsmChange;
+  fetchCache: FetchCache | undefined;
+}> = ({ diff, fetchCache }) => {
   const [error, setError] = useState<Error>();
   const [changes, setChanges] = useState<Change>();
 
   useEffect(() => {
-    calcTagChanges(diff).then(setChanges).catch(setError);
-  }, [diff]);
+    calcTagChanges(diff, fetchCache).then(setChanges).catch(setError);
+  }, [diff, fetchCache]);
 
   if (error) return <>Failed to calculate tag changes</>;
   if (!changes) return <>Loading tag changes...</>;

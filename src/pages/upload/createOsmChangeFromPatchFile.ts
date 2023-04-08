@@ -1,6 +1,5 @@
 import { FeatureCollection, Geometry, Position } from 'geojson';
 import {
-  getFeatures,
   OsmBaseFeature,
   OsmChange,
   OsmFeature,
@@ -10,7 +9,10 @@ import {
   OsmWay,
 } from 'osm-api';
 import { MAP, NWR } from '../HistoryRestorer/util';
-import { chunk } from './util';
+import { FetchCache, fetchChunked } from './util';
+
+// @ts-expect-error -- polyfill
+window.structuredClone ||= (x) => JSON.parse(JSON.stringify(x));
 
 const TEMPLATE_OSM_FEATURE: Omit<OsmFeature, 'id' | 'type'> = {
   // crap that just gets ignored by the API for new features
@@ -44,6 +46,7 @@ const DEPRECATED_TAGS: Record<string, true | Record<string, true>> = {
   'LINZ:dataset': true,
   'brand:wikipedia': true,
   'operator:wikipedia': true,
+  'network:wikipedia': true,
 };
 
 const nextId: Record<OsmFeatureType, number> = {
@@ -55,7 +58,7 @@ const nextId: Record<OsmFeatureType, number> = {
 const coordToNode = (v: Position): OsmNode => ({
   ...TEMPLATE_OSM_FEATURE,
   type: 'node',
-  id: nextId.node++,
+  id: nextId.node--,
   lat: v[1],
   lon: v[0],
 });
@@ -63,6 +66,7 @@ const coordToNode = (v: Position): OsmNode => ({
 function geojsonToOsmGeometry(
   geom: Geometry,
   baseFeature: Omit<OsmBaseFeature, 'type' | 'id'>,
+  __members: OsmRelation['members'] | undefined,
 ): OsmFeature[] | undefined {
   switch (geom.type) {
     case 'Point': {
@@ -70,7 +74,7 @@ function geojsonToOsmGeometry(
         {
           ...baseFeature,
           type: 'node',
-          id: nextId.node++,
+          id: nextId.node--,
           lat: geom.coordinates[1],
           lon: geom.coordinates[0],
         },
@@ -84,7 +88,7 @@ function geojsonToOsmGeometry(
           ...baseFeature,
           tags: { ...baseFeature.tags, type: 'site' },
           type: 'relation',
-          id: nextId.relation++,
+          id: nextId.relation--,
           members: nodes.map((n) => ({ role: '', type: n.type, ref: n.id })),
         },
         ...nodes,
@@ -97,7 +101,7 @@ function geojsonToOsmGeometry(
         {
           ...baseFeature,
           type: 'way',
-          id: nextId.way++,
+          id: nextId.way--,
           nodes: nodes.map((n) => n.id),
         },
         ...nodes,
@@ -112,7 +116,7 @@ function geojsonToOsmGeometry(
         ways.push({
           ...TEMPLATE_OSM_FEATURE,
           type: 'way',
-          id: nextId.way++,
+          id: nextId.way--,
           nodes: segmentNodes.map((n) => n.id),
         });
         nodes.push(...segmentNodes);
@@ -121,16 +125,27 @@ function geojsonToOsmGeometry(
         ...baseFeature,
         tags: { ...baseFeature.tags, type: 'multilinestring' },
         type: 'relation',
-        id: nextId.relation++,
+        id: nextId.relation--,
         members: ways.map((w) => ({ role: '', type: w.type, ref: w.id })),
       };
       return [relation, ...ways, ...nodes];
     }
 
+    case 'GeometryCollection': {
+      const relation: OsmRelation = {
+        ...baseFeature,
+        type: 'relation',
+        id: nextId.relation--,
+        // this code is only used for creating features, not editing, which means
+        // __members is the full list, not a diff. So just save it directly.
+        members: __members!,
+      };
+      return [relation];
+    }
+
     // TODO: support other geometries
     case 'Polygon':
     case 'MultiPolygon':
-    case 'GeometryCollection':
     default:
       return undefined;
   }
@@ -140,7 +155,7 @@ function updateTags(
   original: OsmFeature,
   tagDiff: Record<string, string>,
 ): OsmFeature {
-  const out: OsmFeature = { ...original };
+  const out = structuredClone(original);
   out.tags ||= {};
   for (const [key, value] of Object.entries(tagDiff)) {
     if (value === '🗑️') {
@@ -161,6 +176,37 @@ function updateTags(
   return out;
 }
 
+function updateRelationMembers(
+  relation: OsmRelation,
+  memberDiff: OsmRelation['members'],
+): OsmRelation['members'] {
+  let newMembersList = structuredClone(relation.members);
+  for (const diff of memberDiff) {
+    const firstOldIndex = newMembersList.findIndex(
+      (m) => m.type === diff.type && m.ref === diff.ref,
+    );
+    // start by removing all existing ones
+    newMembersList = newMembersList.filter(
+      (m) => !(m.type === diff.type && m.ref === diff.ref),
+    );
+
+    if (diff.role === '🗑️') {
+      // we've delete every occurance of this feature from the relation, so nothing to do.
+    } else {
+      // if this feature already existed, all instances of it have already been removed.
+      // so add back to the of the array
+      if (firstOldIndex === -1) {
+        // this item is new, so add it to the end of the array
+        newMembersList.push(diff);
+      } else {
+        // add it back at its original position
+        newMembersList.splice(firstOldIndex, 0, diff);
+      }
+    }
+  }
+  return newMembersList;
+}
+
 type Tags = {
   __action: 'edit' | 'move' | 'delete' | '';
   [key: string]: string;
@@ -169,7 +215,7 @@ export type OsmPatch = FeatureCollection<Geometry, Tags>;
 
 export async function createOsmChangeFromPatchFile(
   osmPatch: OsmPatch,
-): Promise<OsmChange> {
+): Promise<{ osmChange: OsmChange; fetched: FetchCache }> {
   const osmChange: OsmChange = {
     create: [],
     delete: [],
@@ -190,24 +236,20 @@ export async function createOsmChangeFromPatchFile(
     }
   }
 
-  const fetched: Record<string, OsmFeature> = {};
-  for (const _type in toFetch) {
-    const type = _type as OsmFeatureType;
-    for (const ids of chunk(toFetch[type], 100)) {
-      console.log(`Fetching ${ids.length} ${type}s...`);
-      const features = await getFeatures(type, ids);
-      for (const feature of features) {
-        const nwrId = feature.type[0] + feature.id;
-        fetched[nwrId] = feature;
-      }
-    }
-  }
+  const fetched = await fetchChunked(toFetch);
 
   for (const f of osmPatch.features) {
-    const { __action, ...tags } = f.properties;
+    const { __action, __members, ...tags } = f.properties;
+    const relationMembers = __members as unknown as
+      | OsmRelation['members']
+      | undefined;
     switch (__action) {
       case 'edit': {
         const edited = updateTags(fetched[f.id!], tags);
+        if (edited.type === 'relation' && relationMembers) {
+          // if the user wants to edit
+          edited.members = updateRelationMembers(edited, relationMembers);
+        }
         osmChange.modify.push(edited);
         break;
       }
@@ -232,10 +274,11 @@ export async function createOsmChangeFromPatchFile(
 
       default: {
         // add
-        const features = geojsonToOsmGeometry(f.geometry, {
-          ...TEMPLATE_OSM_FEATURE,
-          tags,
-        });
+        const features = geojsonToOsmGeometry(
+          f.geometry,
+          { ...TEMPLATE_OSM_FEATURE, tags },
+          relationMembers,
+        );
         if (features) {
           osmChange.create.push(...features);
         } else {
@@ -245,5 +288,5 @@ export async function createOsmChangeFromPatchFile(
     }
   }
 
-  return osmChange;
+  return { osmChange, fetched };
 }

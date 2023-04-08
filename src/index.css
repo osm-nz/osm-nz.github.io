@@ -117,3 +117,10 @@ button.inactive-layer:hover {
   margin-right: 8px;
   opacity: 0.7;
 }
+
+.diff-add {
+  color: green;
+}
+.diff-remove {
+  color: red;
+}

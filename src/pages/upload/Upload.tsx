@@ -1,5 +1,10 @@
 import { useContext, useRef, useState } from 'react';
-import { OsmChange, parseOsmChangeXml, uploadChangeset } from 'osm-api';
+import {
+  OsmChange,
+  createOsmChangeXml,
+  parseOsmChangeXml,
+  uploadChangeset,
+} from 'osm-api';
 import { AuthContext, AuthGateway } from '../../wrappers';
 import { MapPreview } from './MapPreview';
 import { TagChanges } from './TagChanges';
@@ -9,6 +14,8 @@ import {
   OsmPatch,
 } from './createOsmChangeFromPatchFile';
 import './Upload.css';
+import { FetchCache, downloadFile } from './util';
+import { RelationMemberChanges } from './RelationMemberChanges';
 
 // ❤️‍🔥 This script can be used to upload an osmChange file directly to the API
 // In most cases you can upload it to Level0, but this bypasses the 500 feature
@@ -59,6 +66,8 @@ const UploadInner: React.FC = () => {
   const [result, setResult] = useState<number>();
   const [csTags, setCsTags] = useState(tagsToStr(DEFAULT_TAGS));
   const [diff, setDiff] = useState<OsmChange>();
+  const [fetchCache, setFetchCache] = useState<FetchCache>();
+  const [fileName, setFileName] = useState<string>();
 
   const input = useRef<HTMLInputElement>(null);
 
@@ -68,6 +77,7 @@ const UploadInner: React.FC = () => {
     if (!files?.length) return setDiff(undefined); // unselected
 
     try {
+      setFileName(files[0].name);
       const isOsmChange = [...files].some((file) => file.name.endsWith('.osc'));
       if (isOsmChange) {
         if (files.length > 1) {
@@ -92,8 +102,9 @@ const UploadInner: React.FC = () => {
               features: patchFiles.flatMap((file) => file.features),
             };
 
-      const json = await createOsmChangeFromPatchFile(merged);
-      return setDiff(json);
+      const { osmChange, fetched } = await createOsmChangeFromPatchFile(merged);
+      setFetchCache(fetched);
+      return setDiff(osmChange);
     } catch (ex) {
       console.error(ex);
       return setError(ex instanceof Error ? ex : new Error(`${ex}`));
@@ -115,6 +126,12 @@ const UploadInner: React.FC = () => {
       setError(ex instanceof Error ? ex : new Error(`${ex}`));
     }
     setLoading(false);
+  }
+
+  function downloadOsc() {
+    const xml = createOsmChangeXml(-1, diff!);
+    const xmlBlob = new Blob([xml], { type: 'application/xml' });
+    downloadFile(xmlBlob, `${fileName?.split('.')[0]}.osc`);
   }
 
   if (loading) return <h2 className="upload-root">Uploading...</h2>;
@@ -193,7 +210,8 @@ const UploadInner: React.FC = () => {
           <br />
           <strong>Tag Changes:</strong>
           <br />
-          <TagChanges diff={diff} />
+          <TagChanges diff={diff} fetchCache={fetchCache} />
+          <RelationMemberChanges diff={diff} fetchCache={fetchCache} />
           <br />
           <br />
           <button
@@ -203,6 +221,9 @@ const UploadInner: React.FC = () => {
             style={{ fontSize: 32 }}
           >
             Upload
+          </button>
+          <button type="button" onClick={downloadOsc} style={{ fontSize: 32 }}>
+            Download as .osc
           </button>
         </>
       ) : (
