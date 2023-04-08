@@ -1,5 +1,5 @@
-import { createRoot } from 'react-dom/client';
 import { StrictMode, useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Home, Map, Upload, WrappedWhatsup, HistoryRestorer } from './pages';
 
 import './index.css';

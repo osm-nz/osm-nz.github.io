@@ -1,5 +1,5 @@
-import { OsmChange, OsmNode } from 'osm-api';
 import { useRef } from 'react';
+import { OsmChange, OsmNode } from 'osm-api';
 import { FeatureGroup, MapContainer, Polygon } from 'react-leaflet';
 import { FeatureGroup as IFeatureGroup, LatLngBounds } from 'leaflet';
 import { Layers } from '../map/Layers';

@@ -127,7 +127,7 @@ export const Home: React.FC = () => {
             const [n, category, howToAction, rawFile] =
               META[status as keyof typeof META];
             return (
-              <tr>
+              <tr key={status}>
                 <td>{n}</td>
                 <td>{category}</td>
                 <td>{count.toLocaleString('en-nz')}</td>

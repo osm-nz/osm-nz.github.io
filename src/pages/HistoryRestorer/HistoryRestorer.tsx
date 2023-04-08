@@ -1,5 +1,5 @@
-import { getConfig } from 'osm-api';
 import { useContext, useState } from 'react';
+import { getConfig } from 'osm-api';
 import { AuthContext, AuthGateway } from '../../wrappers';
 import { save, validate } from './api';
 import { Item, NWR, ValidationResult } from './util';

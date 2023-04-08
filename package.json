@@ -1,5 +1,5 @@
 {
-  "name": "linz-address-import-homepage",
+  "name": "osm-nz",
   "version": "0.0.0",
   "private": true,
   "dependencies": {
@@ -27,12 +27,7 @@
     "build": "react-scripts build"
   },
   "eslintConfig": {
-    "extends": "kyle",
-    "rules": {
-      "no-underscore-dangle": 0,
-      "no-plusplus": 0,
-      "@typescript-eslint/no-non-null-assertion": 0
-    }
+    "extends": "kyle"
   },
   "prettier": "eslint-config-kyle/prettier",
   "browserslist": [

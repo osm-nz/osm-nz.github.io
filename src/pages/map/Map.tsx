@@ -59,7 +59,6 @@ function returnToRapiD(id: string, locked: Locked) {
 
 // Return a deeper red for changesets with more changes
 function getColor(d: number) {
-  /* eslint-disable no-nested-ternary */
   return d > 1000
     ? '#3a0000'
     : d > 500
@@ -75,7 +74,6 @@ function getColor(d: number) {
     : d > 20
     ? '#c994c7'
     : '#d4b9da';
-  /* eslint-enable no-nested-ternary */
 }
 
 function getPolygon(x: Layer, isLocked: Locked) {
