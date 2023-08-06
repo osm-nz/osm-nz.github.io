@@ -6,7 +6,7 @@ import {
   uploadChangeset,
 } from 'osm-api';
 import { AuthContext, AuthGateway } from '../../wrappers';
-import { OsmPatch } from '../../types';
+import { OsmPatch, Tags } from '../../types';
 import { MapPreview } from './MapPreview';
 import { TagChanges } from './TagChanges';
 import { PlusMinus } from './PlusMinus';
@@ -88,6 +88,32 @@ const UploadInner: React.FC = () => {
               ...patchFiles[0],
               features: patchFiles.flatMap((file) => file.features),
             };
+
+      // if the user uploads multiple patch files, we merge
+      // all the changeset tags with semicolons
+      const changesetTags: Tags = {};
+      for (const patchFile of patchFiles) {
+        if (patchFile.changesetTags) {
+          for (const [key, value] of Object.entries(patchFile.changesetTags)) {
+            if (changesetTags[key]) {
+              // join with a semicolon, avoid duplicate values
+              const existing = new Set(changesetTags[key].split(';'));
+              existing.add(value);
+              changesetTags[key] += [...existing].join(';');
+            } else {
+              // add new tag
+              changesetTags[key] = value;
+            }
+          }
+        }
+      }
+
+      if (Object.keys(changesetTags).length) {
+        // if created_by is missing, set it to our default value
+        changesetTags.created_by ||= DEFAULT_TAGS.created_by;
+
+        setCsTags(tagsToStr(changesetTags));
+      }
 
       const { osmChange, fetched } = await createOsmChangeFromPatchFile(merged);
       setFetchCache(fetched);
