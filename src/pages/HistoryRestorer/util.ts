@@ -2,7 +2,6 @@ import { OsmFeature } from 'osm-api';
 
 export type NWR = 'n' | 'w' | 'r';
 export const MAP = <const>{ n: 'node', w: 'way', r: 'relation' };
-export type LongNWR = (typeof MAP)[keyof typeof MAP];
 
 export type Item = {
   type: NWR;

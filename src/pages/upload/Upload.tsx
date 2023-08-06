@@ -6,13 +6,11 @@ import {
   uploadChangeset,
 } from 'osm-api';
 import { AuthContext, AuthGateway } from '../../wrappers';
+import { OsmPatch } from '../../types';
 import { MapPreview } from './MapPreview';
 import { TagChanges } from './TagChanges';
 import { PlusMinus } from './PlusMinus';
-import {
-  createOsmChangeFromPatchFile,
-  OsmPatch,
-} from './createOsmChangeFromPatchFile';
+import { createOsmChangeFromPatchFile } from './createOsmChangeFromPatchFile';
 import './Upload.css';
 import { FetchCache, downloadFile } from './util';
 import { RelationMemberChanges } from './RelationMemberChanges';
@@ -24,13 +22,6 @@ const DEFAULT_TAGS = {
   source: 'https://wiki.osm.org/LINZ',
   comment: '',
 };
-
-const fileToString = (fileObject: File): Promise<string> =>
-  new Promise((resolve) => {
-    const r = new FileReader();
-    r.readAsText(fileObject, 'utf8');
-    r.onloadend = () => resolve(r.result as string);
-  });
 
 function parseCsTags(str: string): Record<string, string> | undefined {
   try {
@@ -81,14 +72,14 @@ const UploadInner: React.FC = () => {
             'Only 1 osmChange file can be uploaded at a time. Multiple osmPatch files are allowed',
           );
         }
-        const xml = await fileToString(files[0]);
+        const xml = await files[0].text();
         const json = parseOsmChangeXml(xml);
         return setDiff(json);
       }
       // else, this is a osmPatch file
       const patchFiles: OsmPatch[] = [];
       for (const file of files) {
-        patchFiles.push(JSON.parse(await fileToString(file)));
+        patchFiles.push(JSON.parse(await file.text()));
       }
       const merged: OsmPatch =
         patchFiles.length === 1

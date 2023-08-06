@@ -1,5 +1,10 @@
-import { getFeatureHistory, getFeatures, OsmFeature } from 'osm-api';
-import { Item, ValidationResult, LongNWR, MAP } from '../util';
+import {
+  getFeatureHistory,
+  getFeatures,
+  OsmFeature,
+  OsmFeatureType as LongNWR,
+} from 'osm-api';
+import { Item, ValidationResult, MAP } from '../util';
 import { getName, getPreset } from './getPreset';
 
 export async function validate(items: Item[]): Promise<ValidationResult[]> {

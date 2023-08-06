@@ -1,4 +1,4 @@
-import { FeatureCollection, Geometry, Position } from 'geojson';
+import { Geometry, Position } from 'geojson';
 import {
   OsmBaseFeature,
   OsmChange,
@@ -9,6 +9,7 @@ import {
   OsmWay,
 } from 'osm-api';
 import { MAP, NWR } from '../HistoryRestorer/util';
+import { OsmPatch } from '../../types';
 import { FetchCache, fetchChunked } from './util';
 
 window.structuredClone ||= (x) => JSON.parse(JSON.stringify(x));
@@ -209,12 +210,6 @@ function updateRelationMembers(
   return newMembersList;
 }
 
-type Tags = {
-  __action: 'edit' | 'move' | 'delete' | '';
-  [key: string]: string;
-};
-export type OsmPatch = FeatureCollection<Geometry, Tags>;
-
 export async function createOsmChangeFromPatchFile(
   osmPatch: OsmPatch,
 ): Promise<{ osmChange: OsmChange; fetched: FetchCache }> {
@@ -241,10 +236,7 @@ export async function createOsmChangeFromPatchFile(
   const fetched = await fetchChunked(toFetch);
 
   for (const f of osmPatch.features) {
-    const { __action, __members, ...tags } = f.properties;
-    const relationMembers = __members as unknown as
-      | OsmRelation['members']
-      | undefined;
+    const { __action, __members: relationMembers, ...tags } = f.properties;
     switch (__action) {
       case 'edit': {
         const edited = updateTags(fetched[f.id!], tags);
