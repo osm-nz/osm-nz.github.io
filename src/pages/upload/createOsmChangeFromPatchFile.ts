@@ -11,7 +11,6 @@ import {
 import { MAP, NWR } from '../HistoryRestorer/util';
 import { FetchCache, fetchChunked } from './util';
 
-// @ts-expect-error -- polyfill
 window.structuredClone ||= (x) => JSON.parse(JSON.stringify(x));
 
 const TEMPLATE_OSM_FEATURE: Omit<OsmFeature, 'id' | 'type'> = {
@@ -145,9 +144,12 @@ function geojsonToOsmGeometry(
 
     // TODO: support other geometries
     case 'Polygon':
-    case 'MultiPolygon':
-    default:
+    case 'MultiPolygon': {
       return undefined;
+    }
+    default: {
+      return undefined;
+    }
   }
 }
 

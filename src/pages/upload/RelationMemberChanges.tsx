@@ -91,9 +91,9 @@ export const RelationMemberChanges: React.FC<{
           <strong>{tags.name || tags.ref || 'No Name'}</strong>
           <br />
           <pre>
-            {data[nwrId].map((part, i) => {
-              // gotta use the index, it's safe, the array never updated
-              const key = i + part.value;
+            {data[nwrId].map((part, index) => {
+              // gotta use the index, it's safe, the array is never updated
+              const key = index + part.value;
 
               if (part.added) {
                 return (

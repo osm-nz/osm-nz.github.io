@@ -17,15 +17,16 @@ function getCsBbox(osmChange: OsmChange) {
     maxLng: -Infinity,
   };
 
-  Object.values(osmChange)
+  const filteredNodes = Object.values(osmChange)
     .flat()
-    .filter((x): x is OsmNode => x.type === 'node')
-    .forEach((node) => {
-      if (node.lat < bbox.minLat) bbox.minLat = node.lat;
-      if (node.lon < bbox.minLng) bbox.minLng = node.lon;
-      if (node.lat > bbox.maxLat) bbox.maxLat = node.lat;
-      if (node.lon > bbox.maxLng) bbox.maxLng = node.lon;
-    });
+    .filter((x): x is OsmNode => x.type === 'node');
+
+  for (const node of filteredNodes) {
+    if (node.lat < bbox.minLat) bbox.minLat = node.lat;
+    if (node.lon < bbox.minLng) bbox.minLng = node.lon;
+    if (node.lat > bbox.maxLat) bbox.maxLat = node.lat;
+    if (node.lon > bbox.maxLng) bbox.maxLng = node.lon;
+  }
 
   return bbox;
 }

@@ -17,10 +17,6 @@ import './Upload.css';
 import { FetchCache, downloadFile } from './util';
 import { RelationMemberChanges } from './RelationMemberChanges';
 
-// ❤️‍🔥 This script can be used to upload an osmChange file directly to the API
-// In most cases you can upload it to Level0, but this bypasses the 500 feature
-// limit, and gives you an breakdown of what's changed.
-
 const DEFAULT_TAGS = {
   attribution: 'https://wiki.openstreetmap.org/wiki/Contributors#LINZ',
   created_by: 'LINZ Data Import 2.0.0',
@@ -29,10 +25,10 @@ const DEFAULT_TAGS = {
   comment: '',
 };
 
-const fileToString = (fileObj: File): Promise<string> =>
+const fileToString = (fileObject: File): Promise<string> =>
   new Promise((resolve) => {
     const r = new FileReader();
-    r.readAsText(fileObj, 'UTF-8');
+    r.readAsText(fileObject, 'utf8');
     r.onloadend = () => resolve(r.result as string);
   });
 
@@ -162,7 +158,7 @@ const UploadInner: React.FC = () => {
         type="file"
         accept=".osc,.osmPatch.geo.json,.geo.json" // TODO: don't allow any geojson
         multiple
-        onChange={(e) => onFileUpload(e.target.files)}
+        onChange={(event) => onFileUpload(event.target.files)}
         ref={input}
       />
       {diff && (
@@ -182,8 +178,8 @@ const UploadInner: React.FC = () => {
       <br />
       <input
         value={parsedTags?.comment || ''}
-        onChange={(e) => {
-          setCsTags(tagsToStr({ ...parsedTags, comment: e.target.value }));
+        onChange={(event) => {
+          setCsTags(tagsToStr({ ...parsedTags, comment: event.target.value }));
         }}
         placeholder="Changeset Comment"
         style={{ width: 500 }}
@@ -191,9 +187,9 @@ const UploadInner: React.FC = () => {
       <br />
       <textarea
         value={csTags}
-        onChange={(e) => setCsTags(e.target.value)}
-        onBlur={(e) => {
-          const newParsed = parseCsTags(e.target.value);
+        onChange={(event) => setCsTags(event.target.value)}
+        onBlur={(event) => {
+          const newParsed = parseCsTags(event.target.value);
           if (newParsed) setCsTags(tagsToStr(newParsed));
         }}
         style={{ width: 500, height: 200, color: parsedTags ? 'black' : 'red' }}

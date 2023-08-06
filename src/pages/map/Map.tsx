@@ -44,13 +44,13 @@ function returnToRapiD(id: string, locked: Locked) {
     const [user, minutesAgo] = locked;
     const suffix =
       'Check back in a day.\n\nIf you continue, you might override or duplicate their work!';
-    const msg =
+    const message =
       minutesAgo === 'done'
         ? `This dataset may already have been uploaded by someone else! ${suffix}`
         : `Someone else (${user}) started editing this dataset ${minutesAgo} minutes ago. ${suffix}`;
 
     // eslint-disable-next-line no-restricted-globals, no-alert
-    if (!confirm(msg)) return;
+    if (!confirm(message)) return;
   }
 
   window.opener.postMessage(`ADD_SECTOR=${id}`);
@@ -93,13 +93,13 @@ function getPolygon(x: Layer, isLocked: Locked) {
 }
 
 let beforeHoveredColor = 'orange'; // store colour of the hovered polygon
-function toggleFeatureHighlight(e: LeafletMouseEvent, on: boolean) {
+function toggleFeatureHighlight(event: LeafletMouseEvent, on: boolean) {
   // highlight polygon on mouse hover
   if (on) {
-    beforeHoveredColor = e.target.options.color;
-    e.target.setStyle({ color: 'yellow' });
+    beforeHoveredColor = event.target.options.color;
+    event.target.setStyle({ color: 'yellow' });
   } else {
-    e.target.setStyle({ color: beforeHoveredColor });
+    event.target.setStyle({ color: beforeHoveredColor });
   }
 }
 
@@ -152,7 +152,7 @@ export const Map: React.FC = () => {
       .filter((x) => showPreview || !x.isPreview),
   );
 
-  const getLockedMsg = (x: Layer) =>
+  const getLockedMessage = (x: Layer) =>
     data[1][x.id]
       ? `Someone else ${
           data[1][x.id]![1] === 'done'
@@ -173,7 +173,7 @@ export const Map: React.FC = () => {
         <input
           type="checkbox"
           checked={showPreview}
-          onChange={(e) => setShowPreview(e.target.checked)}
+          onChange={(event) => setShowPreview(event.target.checked)}
         />
         Show Preview Layers
         <br />
@@ -215,8 +215,8 @@ export const Map: React.FC = () => {
                     click: () => {
                       if (fromRapiD) returnToRapiD(x.id, data[1][x.id]);
                     },
-                    mouseover: (ev) => toggleFeatureHighlight(ev, true),
-                    mouseout: (ev) => toggleFeatureHighlight(ev, false),
+                    mouseover: (event) => toggleFeatureHighlight(event, true),
+                    mouseout: (event) => toggleFeatureHighlight(event, false),
                   }}
                 >
                   <Tooltip direction="bottom" sticky>
@@ -224,7 +224,7 @@ export const Map: React.FC = () => {
                     <br />
                     {x.snippet}
                     <br />
-                    {getLockedMsg(x)}
+                    {getLockedMessage(x)}
                   </Tooltip>
                 </Polygon>
               ))}
@@ -234,13 +234,13 @@ export const Map: React.FC = () => {
           >
             <strong># of changes</strong>
             <br />
-            {[0, 20, 40, 60, 100, 200, 500, 1000].map((_, i, grades) => (
+            {[0, 20, 40, 60, 100, 200, 500, 1000].map((_, index, grades) => (
               <Fragment key={_}>
-                <i style={{ background: getColor(grades[i] + 1) }} />
-                {grades[i]}
-                {grades[i + 1] ? (
+                <i style={{ background: getColor(grades[index] + 1) }} />
+                {grades[index]}
+                {grades[index + 1] ? (
                   <>
-                    &ndash;{grades[i + 1]}
+                    &ndash;{grades[index + 1]}
                     <br />
                   </>
                 ) : (

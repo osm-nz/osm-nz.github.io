@@ -1,3 +1,3 @@
-export const uniqBy = <T>(prop: keyof T, arr: T[]): T[] => [
-  ...new Map(arr.map((item) => [item[prop], item])).values(),
+export const uniqBy = <T>(property: keyof T, array: T[]): T[] => [
+  ...new Map(array.map((item) => [item[property], item])).values(),
 ];

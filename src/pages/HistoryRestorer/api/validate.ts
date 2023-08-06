@@ -4,22 +4,24 @@ import { getName, getPreset } from './getPreset';
 
 export async function validate(items: Item[]): Promise<ValidationResult[]> {
   if (!items.length) throw new Error('No data entered');
-  if (items.some((i) => !i.fromId || !i.toId)) {
+  if (items.some((item) => !item.fromId || !item.toId)) {
     throw new Error('Some fields are blank');
   }
 
   const toFetch: Record<LongNWR, (string | number)[]> = {
-    node: items.filter((i) => i.type === 'n').map((i) => i.toId!),
-    way: items.filter((i) => i.type === 'w').map((i) => i.toId!),
-    relation: items.filter((i) => i.type === 'r').map((i) => i.toId!),
+    node: items.filter((item) => item.type === 'n').map((item) => item.toId!),
+    way: items.filter((item) => item.type === 'w').map((item) => item.toId!),
+    relation: items
+      .filter((item) => item.type === 'r')
+      .map((item) => item.toId!),
   };
   // process the deleted features one-by-one
   for (const deleted of items) {
     const type = MAP[deleted.type];
-    const res = await getFeatureHistory(type, deleted.fromId!);
+    const deletedFeatures = await getFeatureHistory(type, deleted.fromId!);
 
-    const latestVersion = res.slice(-1)[0];
-    const secondLastVersion = res.slice(-2)[0];
+    const latestVersion = deletedFeatures.at(-1)!;
+    const secondLastVersion = deletedFeatures.at(-2)!;
 
     if (latestVersion.visible !== false) {
       throw new Error(`${type} ${deleted.fromId} is not deleted`);

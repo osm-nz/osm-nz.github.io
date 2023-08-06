@@ -104,7 +104,7 @@ export const Home: React.FC = () => {
   if (!data) return <>Loading...</>;
 
   const d = new Date(data.date);
-  const hours = Math.round((+new Date() - +d) / 1000 / 60 / 60);
+  const hours = Math.round((Date.now() - +d) / 1000 / 60 / 60);
 
   return (
     <div style={{ margin: 15 }}>

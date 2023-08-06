@@ -1,7 +1,7 @@
 function timeSince(
   date: number,
 ): [num: number, unit: Intl.RelativeTimeFormatUnit] {
-  const seconds = Math.floor((+new Date() - date) / 1000);
+  const seconds = Math.floor((Date.now() - date) / 1000);
   const s = (n: number) => Math.floor(seconds / n);
 
   if (s(60 * 60 * 24 * 365) > 1) return [s(60 * 60 * 24 * 365), 'years'];

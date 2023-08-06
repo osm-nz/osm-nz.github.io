@@ -97,19 +97,19 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
     if (tags.length > 1) {
       const allAre1 = tags.every(([, count]) => count === 1);
       if (allAre1) {
-        children = tags.map(([val], i) => (
-          <Fragment key={val}>
-            {!!i && '/'}
-            <code>{val}</code>
+        children = tags.map(([value], index) => (
+          <Fragment key={value}>
+            {!!index && '/'}
+            <code>{value}</code>
           </Fragment>
         ));
         keyCount = ` (${tags.length})`;
       } else {
         children = (
           <ul>
-            {tags.map(([val, count]) => (
-              <li key={val}>
-                <code>{val}</code> {count > 1 && `(${count})`}
+            {tags.map(([value, count]) => (
+              <li key={value}>
+                <code>{value}</code> {count > 1 && `(${count})`}
               </li>
             ))}
           </ul>

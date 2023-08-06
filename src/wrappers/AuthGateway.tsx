@@ -58,7 +58,7 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
     setError(undefined);
   }, []);
 
-  const ctx = useMemo(
+  const context = useMemo(
     () => ({ user: user!, logout: onLogout }),
     [user, onLogout],
   );
@@ -96,5 +96,7 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
 
   if (!user) return <>Loading...</>;
 
-  return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={context}>{children}</AuthContext.Provider>
+  );
 };

@@ -7,7 +7,7 @@ import classes from './HistoryRestorer.module.css';
 
 const NEW_FEATURE = (): Item => ({ type: 'n' });
 
-const SelectNWR: React.FC<{ value: NWR; onChange(newVal: NWR): void }> = ({
+const SelectNWR: React.FC<{ value: NWR; onChange(newValue: NWR): void }> = ({
   value,
   onChange,
 }) => {
@@ -15,7 +15,7 @@ const SelectNWR: React.FC<{ value: NWR; onChange(newVal: NWR): void }> = ({
     <select
       className={classes.smallInput}
       value={value}
-      onChange={(e) => onChange(e.target.value as NWR)}
+      onChange={(event) => onChange(event.target.value as NWR)}
     >
       <option value="n">Node</option>
       <option value="w">Way</option>
@@ -34,13 +34,15 @@ const HistoryRestorerInner: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<number>();
 
-  function updateVal<T extends keyof Item>(
-    index: number,
+  function updateValue<T extends keyof Item>(
+    indexToUpdate: number,
     attribute: T,
     newValue: Item[T],
   ) {
     setItems((list) =>
-      list.map((x, j) => (index === j ? { ...x, [attribute]: newValue } : x)),
+      list.map((item, index) =>
+        indexToUpdate === index ? { ...item, [attribute]: newValue } : item,
+      ),
     );
     setValidationResults(undefined); // invalidate
   }
@@ -48,12 +50,12 @@ const HistoryRestorerInner: React.FC = () => {
   async function onSubmit() {
     setLoading(true);
     try {
-      if (!validationResults) {
-        // validate
-        setValidationResults(await validate(items));
-      } else {
+      if (validationResults) {
         // save to OSM
         setDone(await save(validationResults));
+      } else {
+        // validate
+        setValidationResults(await validate(items));
       }
     } catch (ex) {
       console.error(ex);
@@ -121,21 +123,23 @@ const HistoryRestorerInner: React.FC = () => {
           <strong>Deleted Feature</strong>
           <strong>New Feature</strong>
         </div>
-        {items.map((item, i) => {
-          const v = validationResults?.[i];
+        {items.map((item, index) => {
+          const v = validationResults?.[index];
           return (
             // eslint-disable-next-line react/no-array-index-key -- `reload` makes this safe
-            <div className={classes.item} key={reload + i}>
+            <div className={classes.item} key={reload + index}>
               <div>
                 <SelectNWR
                   value={item.type}
-                  onChange={(newType) => updateVal(i, 'type', newType)}
+                  onChange={(newType) => updateValue(index, 'type', newType)}
                 />
                 <input
                   className={classes.smallInput}
                   type="tel"
                   value={item.fromId || ''}
-                  onChange={(e) => updateVal(i, 'fromId', +e.target.value)}
+                  onChange={(event) =>
+                    updateValue(index, 'fromId', +event.target.value)
+                  }
                 />
                 {v && (
                   <small>
@@ -154,13 +158,15 @@ const HistoryRestorerInner: React.FC = () => {
               <div>
                 <SelectNWR
                   value={item.type}
-                  onChange={(newType) => updateVal(i, 'type', newType)}
+                  onChange={(newType) => updateValue(index, 'type', newType)}
                 />
                 <input
                   className={classes.smallInput}
                   type="tel"
                   value={item.toId || ''}
-                  onChange={(e) => updateVal(i, 'toId', +e.target.value)}
+                  onChange={(event) =>
+                    updateValue(index, 'toId', +event.target.value)
+                  }
                 />
                 {v && (
                   <small>
@@ -179,7 +185,7 @@ const HistoryRestorerInner: React.FC = () => {
                     setValidationResults(undefined); // invalidate
                     setItems((list) => {
                       const newList = [...list];
-                      newList.splice(i, 1);
+                      newList.splice(index, 1);
                       return newList;
                     });
                   }}
@@ -196,7 +202,7 @@ const HistoryRestorerInner: React.FC = () => {
         type="button"
         className={classes.btn}
         onClick={() => {
-          setItems((i) => [...i, NEW_FEATURE()]);
+          setItems((index) => [...index, NEW_FEATURE()]);
           setValidationResults(undefined); // invalidate
         }}
       >
