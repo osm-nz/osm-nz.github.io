@@ -55,13 +55,19 @@ const UploadInner: React.FC = () => {
   const [diff, setDiff] = useState<OsmChange>();
   const [fetchCache, setFetchCache] = useState<FetchCache>();
   const [fileName, setFileName] = useState<string>();
+  const [messages, setMessages] = useState<string[]>([]);
 
   const input = useRef<HTMLInputElement>(null);
 
   const parsedTags = parseCsTags(csTags);
 
   async function onFileUpload(files: FileList | null) {
-    if (!files?.length) return setDiff(undefined); // unselected
+    if (!files?.length) {
+      // the user unselected the current file, so reset
+      setMessages([]); // reset messages
+      // don't reset changeset tags
+      return setDiff(undefined);
+    }
 
     try {
       setFileName(files[0].name);
@@ -114,6 +120,13 @@ const UploadInner: React.FC = () => {
 
         setCsTags(tagsToStr(changesetTags));
       }
+
+      const instructions = new Set(
+        patchFiles.map((patchFile) => patchFile.instructions || ''),
+      );
+      instructions.delete('');
+
+      setMessages([...instructions]);
 
       const { osmChange, fetched } = await createOsmChangeFromPatchFile(merged);
       setFetchCache(fetched);
@@ -227,6 +240,15 @@ const UploadInner: React.FC = () => {
           <RelationMemberChanges diff={diff} fetchCache={fetchCache} />
           <br />
           <br />
+          {!!messages.length && (
+            <>
+              {messages.map((message) => (
+                <div key={message}>⚠️ {message}</div>
+              ))}
+              <br />
+              <br />
+            </>
+          )}
           <button
             type="button"
             onClick={upload}
