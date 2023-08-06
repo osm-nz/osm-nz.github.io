@@ -125,6 +125,7 @@ export const Map: React.FC = () => {
   const [layer, setLayer] = useState<string>();
   const [error, setError] = useState();
   const [data, setData] = useState<Data>();
+  const [layersToHide, setLayersToHide] = useState<string[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -206,6 +207,7 @@ export const Map: React.FC = () => {
           {layer &&
             data[0].results
               .filter((x) => x.name.startsWith(layer))
+              .filter((x) => !layersToHide.includes(x.id))
               .map((x) => (
                 <Polygon
                   key={x.id}
@@ -215,6 +217,8 @@ export const Map: React.FC = () => {
                     click: () => {
                       if (fromRapiD) returnToRapiD(x.id, data[1][x.id]);
                     },
+                    contextmenu: () =>
+                      setLayersToHide((existing) => [...existing, x.id]),
                     mouseover: (event) => toggleFeatureHighlight(event, true),
                     mouseout: (event) => toggleFeatureHighlight(event, false),
                   }}
