@@ -5,6 +5,7 @@ import {
   parseOsmChangeXml,
   uploadChangeset,
 } from 'osm-api';
+import { parse } from 'jsonc-parser';
 import { AuthContext, AuthGateway } from '../../wrappers';
 import { OsmPatch, Tags } from '../../types';
 import { MapPreview } from './MapPreview';
@@ -85,7 +86,7 @@ const UploadInner: React.FC = () => {
       // else, this is a osmPatch file
       const patchFiles: OsmPatch[] = [];
       for (const file of files) {
-        patchFiles.push(JSON.parse(await file.text()));
+        patchFiles.push(parse(await file.text()));
       }
       const merged: OsmPatch =
         patchFiles.length === 1
