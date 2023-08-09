@@ -168,11 +168,26 @@ function updateTags(
     }
   }
 
+  const anyLinzRefTags = Object.keys(out.tags).some((key) =>
+    key.startsWith('ref:linz:'),
+  );
+
   // remove deprecated tags like iD does if we're touching the feature anyway
   for (const [key, value] of Object.entries(out.tags)) {
     const deprecated = DEPRECATED_TAGS[key];
     if (deprecated === true || deprecated?.[value]) {
       delete out.tags[key];
+
+      // if we're removing source_ref=..., and there is no source tag, nor
+      // any linz:ref tags, then add source=LINZ (except on buildings).
+      if (
+        key === 'source_ref' &&
+        !out.tags.source &&
+        !anyLinzRefTags &&
+        !out.tags.building
+      ) {
+        out.tags.source = 'LINZ';
+      }
     }
   }
 
