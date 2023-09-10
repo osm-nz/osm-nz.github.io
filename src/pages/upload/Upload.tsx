@@ -106,7 +106,7 @@ const UploadInner: React.FC = () => {
               // join with a semicolon, avoid duplicate values
               const existing = new Set(changesetTags[key].split(';'));
               existing.add(value);
-              changesetTags[key] += [...existing].join(';');
+              changesetTags[key] = [...existing].join(';');
             } else {
               // add new tag
               changesetTags[key] = value;
