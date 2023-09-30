@@ -1,6 +1,13 @@
 import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Home, Map, Upload, WrappedWhatsup, HistoryRestorer } from './pages';
+import {
+  AddressImportHome,
+  Home,
+  Map,
+  Upload,
+  WrappedWhatsup,
+  HistoryRestorer,
+} from './pages';
 
 import './index.css';
 
@@ -19,6 +26,7 @@ const App: React.FC = () => {
   if (path === '/upload') return <Upload />;
   if (path === '/map') return <Map />;
   if (path === '/restore-history') return <HistoryRestorer />;
+  if (path === '/address-import') return <AddressImportHome />;
 
   // all other routes: show home page
   return <Home />;

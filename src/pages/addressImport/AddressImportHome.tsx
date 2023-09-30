@@ -11,7 +11,7 @@ type Data = {
   total: number;
 };
 
-export const Home: React.FC = () => {
+export const AddressImportHome: React.FC = () => {
   const [error, setError] = useState<Error>();
   const [data, setData] = useState<Data>();
 
