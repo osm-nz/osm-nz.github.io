@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@nivo/line": "^0.83.0",
     "@rapideditor/country-coder": "^5.2.1",
     "diff": "^5.1.0",
     "jsonc-parser": "^3.2.0",
@@ -11,7 +12,8 @@
     "osm-api": "^1.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-leaflet": "^4.2.1"
+    "react-leaflet": "^4.2.1",
+    "react-timeago-i18n": "^1.1.0"
   },
   "devDependencies": {
     "@types/diff": "^5.0.3",
@@ -39,6 +41,7 @@
       }
     },
     "rules": {
+      "unicorn/no-unreadable-array-destructuring": "off",
       "@typescript-eslint/no-dynamic-delete": "off",
       "no-lonely-if": "off"
     }
