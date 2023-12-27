@@ -232,7 +232,7 @@ const UploadInner: React.FC = () => {
           <PlusMinus diff={diff} />
           <strong>Approximate Extent of nodes:</strong>
           <br />
-          <MapPreview diff={diff} />
+          <MapPreview diff={diff} fetchCache={fetchCache} />
           <br />
           <br />
           <strong>Tag Changes:</strong>

@@ -1,15 +1,21 @@
-import { useRef } from 'react';
-import type { OsmChange, OsmNode } from 'osm-api';
+import { useMemo, useRef } from 'react';
+import type { OsmChange } from 'osm-api';
 import { FeatureGroup, MapContainer, Polygon } from 'react-leaflet';
 import { type FeatureGroup as IFeatureGroup, LatLngBounds } from 'leaflet';
 import { Layers } from '../map/Layers';
+import type { FetchCache } from './util';
+import { recurseToNodes } from './helpers/recurseToNodes';
 
 /**
+ * For osmPatch files, we have access to all the ways/relation
+ * members from when we ran the diff. So we can use that data.
+ *
+ * But for osmChange files,
  * this doesn't work for ways or relations, so it's pretty dumb.
  * It only considers the nodes that exist in the osmChange file.
  * See https://wiki.osm.org/API_v0.6#Bounding_box_computation
  */
-function getCsBbox(osmChange: OsmChange) {
+function getCsBbox(osmChange: OsmChange, fetchCache: FetchCache | undefined) {
   const bbox = {
     minLat: Infinity,
     minLng: Infinity,
@@ -19,7 +25,7 @@ function getCsBbox(osmChange: OsmChange) {
 
   const filteredNodes = Object.values(osmChange)
     .flat()
-    .filter((x): x is OsmNode => x.type === 'node');
+    .flatMap((x) => recurseToNodes(x, fetchCache));
 
   for (const node of filteredNodes) {
     if (node.lat < bbox.minLat) bbox.minLat = node.lat;
@@ -31,12 +37,15 @@ function getCsBbox(osmChange: OsmChange) {
   return bbox;
 }
 
-export const MapPreview: React.FC<{ diff: OsmChange }> = ({ diff }) => {
+export const MapPreview: React.FC<{
+  diff: OsmChange;
+  fetchCache: FetchCache | undefined;
+}> = ({ diff, fetchCache }) => {
   const polygonGroup = useRef<IFeatureGroup>(null);
 
   // TODO: react hook to download all nodes of ways/relations that were touched
   // for small features. Render each feature on the map
-  const bbox = getCsBbox(diff);
+  const bbox = useMemo(() => getCsBbox(diff, fetchCache), [diff, fetchCache]);
 
   if (Object.values(bbox).some((n) => !Number.isFinite(n))) {
     return <>No preview available</>;
