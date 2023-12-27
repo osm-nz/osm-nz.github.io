@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useState } from 'react';
+import clsx from 'clsx';
 import type { OsmChange } from 'osm-api';
 import { type FetchCache, type ToFetch, fetchChunked } from './util';
+import classes from './Upload.module.css';
 
 type SimpleRecord = {
   [key: string]: { [value: string]: number };
@@ -12,6 +14,8 @@ type Change = {
   featureDeleted: SimpleRecord;
   changed: SimpleRecord;
 };
+
+const ARROW = '→';
 
 async function calcTagChanges(
   diff: OsmChange,
@@ -76,7 +80,7 @@ async function calcTagChanges(
       } else if (newTags[key] !== oldTags[key]) {
         // value changed
 
-        const value = `${oldTags[key]} ~~> ${newTags[key]}`;
+        const value = `${oldTags[key]} ${ARROW} ${newTags[key]}`;
 
         out.changed[key] ||= {};
         out.changed[key][value] ||= 0;
@@ -88,7 +92,28 @@ async function calcTagChanges(
   return out;
 }
 
-const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
+const RenderValue: React.FC<{ value: string; className: string }> = ({
+  value,
+  className,
+}) => {
+  if (value.includes(ARROW)) {
+    const [before, after] = value.split(ARROW);
+    return (
+      <span>
+        <code className={classes.changedOld}>{before.trim()}</code> {ARROW}{' '}
+        <code className={classes.changedNew}>{after.trim()}</code>
+      </span>
+    );
+  }
+
+  return <code className={className}>{value}</code>;
+};
+
+const renderSimpleSection = (
+  list: SimpleRecord,
+  className: string,
+  label: string,
+) =>
   Object.entries(list).map(([key, vals]) => {
     const tags = Object.entries(vals);
 
@@ -100,7 +125,7 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
         children = tags.map(([value], index) => (
           <Fragment key={value}>
             {!!index && '/'}
-            <code>{value}</code>
+            <RenderValue value={value} className={className} />
           </Fragment>
         ));
         keyCount = ` (${tags.length})`;
@@ -109,7 +134,8 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
           <ul>
             {tags.map(([value, count]) => (
               <li key={value}>
-                <code>{value}</code> {count > 1 && `(${count})`}
+                <RenderValue value={value} className={className} />
+                {count > 1 && `(${count})`}
               </li>
             ))}
           </ul>
@@ -117,13 +143,13 @@ const renderSimpleSection = (list: SimpleRecord, prefix: string) =>
         keyCount = '';
       }
     } else {
-      children = <code>{tags[0][0]}</code>;
+      children = <RenderValue value={tags[0][0]} className={className} />;
       keyCount = ` (${tags[0][1]})`;
     }
     return (
-      <li key={prefix + key} className={prefix}>
-        {prefix}
-        {keyCount} <code>{key}=</code>
+      <li key={className + key}>
+        {label}
+        {keyCount} <code className={className}>{key}=</code>
         {children}
       </li>
     );
@@ -145,15 +171,17 @@ export const TagChanges: React.FC<{
 
   const noChanges = Object.values(changes).every((x) => !Object.keys(x).length);
   if (noChanges) {
-    return <div className="alert error">No tags changed!</div>;
+    return (
+      <div className={clsx(classes.alert, classes.error)}>No tags changed!</div>
+    );
   }
 
   return (
-    <ul className="tagChanges">
-      {renderSimpleSection(changes.added, 'Added')}
-      {renderSimpleSection(changes.changed, 'Changed')}
-      {renderSimpleSection(changes.removed, 'Removed')}
-      {renderSimpleSection(changes.featureDeleted, 'Deleted')}
+    <ul className={classes.tagChanges}>
+      {renderSimpleSection(changes.added, classes.added, 'Added')}
+      {renderSimpleSection(changes.changed, classes.changedOld, 'Changed')}
+      {renderSimpleSection(changes.removed, classes.removed, 'Removed')}
+      {renderSimpleSection(changes.featureDeleted, classes.deleted, 'Deleted')}
     </ul>
   );
 };

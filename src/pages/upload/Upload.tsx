@@ -6,16 +6,18 @@ import {
   uploadChangeset,
 } from 'osm-api';
 import { parse } from 'jsonc-parser';
+import clsx from 'clsx';
 import { AuthContext, AuthGateway } from '../../wrappers';
-import type { OsmPatch, Tags } from '../../types';
+import type { OsmPatch, OsmPatchFeature, Tags } from '../../types';
 import { MapPreview } from './MapPreview';
 import { TagChanges } from './TagChanges';
 import { PlusMinus } from './PlusMinus';
 import { createOsmChangeFromPatchFile } from './createOsmChangeFromPatchFile';
-import './Upload.css';
+import classes from './Upload.module.css';
 import { type FetchCache, downloadFile } from './util';
 import { RelationMemberChanges } from './RelationMemberChanges';
 import type { Bbox } from './helpers/bbox';
+import { DiffForFeature } from './components/DiffForFeature';
 
 const DEFAULT_TAGS = {
   attribution: 'https://wiki.openstreetmap.org/wiki/Contributors#LINZ',
@@ -58,7 +60,9 @@ const UploadInner: React.FC = () => {
   const [fetchCache, setFetchCache] = useState<FetchCache>();
   const [fileName, setFileName] = useState<string>();
   const [messages, setMessages] = useState<string[]>([]);
+  const [osmPatch, setOsmPatch] = useState<OsmPatch>();
   const [bboxFromOsmPatch, setBboxFromOsmPatch] = useState<Bbox>();
+  const [focusedFeature, setFocusedFeature] = useState<OsmPatchFeature>();
 
   const input = useRef<HTMLInputElement>(null);
 
@@ -135,6 +139,7 @@ const UploadInner: React.FC = () => {
         await createOsmChangeFromPatchFile(merged);
       setFetchCache(fetched);
       setBboxFromOsmPatch(bbox);
+      setOsmPatch(merged);
       return setDiff(osmChange);
     } catch (ex) {
       console.error(ex);
@@ -165,14 +170,25 @@ const UploadInner: React.FC = () => {
     downloadFile(xmlBlob, `${fileName?.split('.')[0]}.osc`);
   }
 
-  if (loading) return <h2 className="upload-root">Uploading...</h2>;
+  if (loading) return <h2 className={classes.uploadRoot}>Uploading...</h2>;
 
   return (
-    <div className="upload-root">
-      {error && <div className="alert error">{error.message}</div>}
+    <div className={classes.uploadRoot}>
+      {error && (
+        <div className={clsx(classes.alert, classes.error)}>
+          {error.message}
+        </div>
+      )}
       {result && (
-        <div className="alert">
-          Uploaded! <a href={`https://osm.org/changeset/${result}`}>{result}</a>
+        <div className={classes.alert}>
+          Uploaded!{' '}
+          <a
+            href={`https://osm.org/changeset/${result}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {result}
+          </a>
         </div>
       )}
       {(error || result) && (
@@ -191,7 +207,7 @@ const UploadInner: React.FC = () => {
       <br />
       <input
         type="file"
-        accept=".osc,.osmPatch.geo.json,.geo.json" // TODO: don't allow any geojson
+        accept=".osc,.osmPatch.geo.json"
         multiple
         onChange={(event) => onFileUpload(event.target.files)}
         ref={input}
@@ -234,16 +250,31 @@ const UploadInner: React.FC = () => {
       {diff ? (
         <>
           <PlusMinus diff={diff} />
-          <strong>Approximate Extent of nodes:</strong>
           <br />
-          <MapPreview
-            diff={diff}
-            fetchCache={fetchCache}
-            bboxFromOsmPatch={bboxFromOsmPatch}
-          />
+          <div style={{ display: 'flex', gap: 16 }}>
+            <div>
+              <MapPreview
+                diff={diff}
+                fetchCache={fetchCache}
+                osmPatch={osmPatch}
+                bboxFromOsmPatch={bboxFromOsmPatch}
+                setFocusedFeature={setFocusedFeature}
+              />
+            </div>
+            <div>
+              {focusedFeature ? (
+                <DiffForFeature
+                  feature={focusedFeature}
+                  original={fetchCache?.[`${focusedFeature.id}`]}
+                />
+              ) : (
+                <em>Select a feature to view more details</em>
+              )}
+            </div>
+          </div>
           <br />
           <br />
-          <strong>Tag Changes:</strong>
+          <strong>All Tag Changes:</strong>
           <br />
           <TagChanges diff={diff} fetchCache={fetchCache} />
           <RelationMemberChanges diff={diff} fetchCache={fetchCache} />
@@ -269,10 +300,12 @@ const UploadInner: React.FC = () => {
           <button type="button" onClick={downloadOsc} style={{ fontSize: 32 }}>
             Download as .osc
           </button>
+          <br />“{parsedTags?.comment || '(no comment)'}” as{' '}
+          <code>{user.display_name}</code>
         </>
       ) : (
         <>
-          Upload a <code>.osc</code> or <code>.osmPatch.geo.json</code> file to
+          Upload an <code>.osc</code> or <code>.osmPatch.geo.json</code> file to
           see the remaining options
         </>
       )}

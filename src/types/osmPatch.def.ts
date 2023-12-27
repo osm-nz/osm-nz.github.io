@@ -15,3 +15,5 @@ export type OsmPatch = FeatureCollection<
   instructions?: string;
   changesetTags?: Tags;
 };
+
+export type OsmPatchFeature = OsmPatch['features'][number];

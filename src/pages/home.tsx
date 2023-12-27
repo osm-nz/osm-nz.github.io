@@ -8,6 +8,9 @@ export const Home: React.FC = () => (
       <li>
         <a href="/missing-streets">Missing Streets</a>
       </li>
+      {/* <li>
+        <a href="#/upload">For Importers: OsmPatch Upload Tool</a>
+      </li> */}
     </ul>
   </div>
 );

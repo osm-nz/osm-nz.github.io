@@ -1,20 +1,35 @@
 import { useMemo, useRef } from 'react';
 import type { OsmChange } from 'osm-api';
-import { FeatureGroup, MapContainer, Polygon } from 'react-leaflet';
+import {
+  FeatureGroup,
+  GeoJSON,
+  MapContainer,
+  Marker,
+  Polygon,
+} from 'react-leaflet';
 import { type FeatureGroup as IFeatureGroup, LatLngBounds } from 'leaflet';
 import { Layers } from '../map/Layers';
+import type { OsmPatch, OsmPatchFeature } from '../../types';
+import { ICONS } from '../map/icons';
 import type { FetchCache } from './util';
 import { type Bbox, getCsBbox } from './helpers/bbox';
 
+const ICON_COLOUR_MAP = {
+  delete: 'red',
+  move: 'violet',
+  edit: 'gold',
+  '': 'green',
+} as const;
+
 export const MapPreview: React.FC<{
   diff: OsmChange;
+  osmPatch?: OsmPatch;
   fetchCache: FetchCache | undefined;
   bboxFromOsmPatch: Bbox | undefined;
-}> = ({ diff, fetchCache, bboxFromOsmPatch }) => {
+  setFocusedFeature(feature: OsmPatchFeature): void;
+}> = ({ diff, osmPatch, fetchCache, bboxFromOsmPatch, setFocusedFeature }) => {
   const polygonGroup = useRef<IFeatureGroup>(null);
 
-  // TODO: react hook to download all nodes of ways/relations that were touched
-  // for small features. Render each feature on the map
   const bbox = useMemo(
     () => getCsBbox(diff, fetchCache, bboxFromOsmPatch),
     [diff, fetchCache, bboxFromOsmPatch],
@@ -28,12 +43,10 @@ export const MapPreview: React.FC<{
     <MapContainer
       style={{ width: 500, height: 500, margin: 'auto' }}
       scrollWheelZoom
-      ref={(map) =>
-        map?.fitBounds(
-          new LatLngBounds(
-            [bbox.minLat, bbox.minLng],
-            [bbox.maxLat, bbox.maxLng],
-          ),
+      bounds={
+        new LatLngBounds(
+          { lat: bbox.minLat, lng: bbox.minLng },
+          { lat: bbox.maxLat, lng: bbox.maxLng },
         )
       }
     >
@@ -49,6 +62,40 @@ export const MapPreview: React.FC<{
           ]}
         />
       </FeatureGroup>
+
+      {/* we only support nice previews for osmPatch files */}
+      {osmPatch && (
+        <FeatureGroup>
+          {osmPatch.features.map((feature) => {
+            const colour = ICON_COLOUR_MAP[feature.properties.__action || ''];
+
+            if (feature.geometry.type === 'Point') {
+              // this one has to be handled seprately
+              // if we want to customise the colour, since
+              // colour is only customisable by changing the
+              // icon itself.
+              const [lng, lat] = feature.geometry.coordinates;
+              return (
+                <Marker
+                  position={{ lat, lng }}
+                  key={feature.id}
+                  icon={ICONS[colour]}
+                  eventHandlers={{ click: () => setFocusedFeature(feature) }}
+                />
+              );
+            }
+
+            return (
+              <GeoJSON
+                key={feature.id}
+                data={feature}
+                pathOptions={{ color: colour }}
+                eventHandlers={{ click: () => setFocusedFeature(feature) }}
+              />
+            );
+          })}
+        </FeatureGroup>
+      )}
     </MapContainer>
   );
 };

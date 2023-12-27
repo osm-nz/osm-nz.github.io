@@ -1,0 +1,71 @@
+:root {
+  /* same colours as OSMCha */
+  --added: #b7e8e0;
+  --removed: #e4b3bb;
+  --changedOld: #efdab0;
+  --changedNew: #f3f3c2;
+}
+
+.added {
+  background: var(--added);
+}
+.removed {
+  background: var(--removed);
+}
+.deleted {
+  background: var(--removed);
+}
+.changedOld {
+  background: var(--changedOld);
+}
+.changedNew {
+  background: var(--changedNew);
+}
+
+.uploadRoot {
+  margin: 32px;
+  text-align: center;
+}
+
+.tagChanges {
+  overflow-wrap: break-word;
+  text-align: left;
+}
+
+.alert {
+  background: #ddf4ff;
+  border-color: #54aeff66;
+  border-radius: 6px;
+  border-style: solid;
+  border-width: 1px;
+  padding: 20px;
+  display: inline-block;
+  min-width: 400px;
+}
+.alert.error {
+  background: #ffebe9;
+  border-color: #ff818266;
+}
+
+.diffTable {
+  width: 100%;
+
+  & tr:nth-of-type(odd) {
+    background: #f8f8f8;
+  }
+
+  & tr > td:first-child {
+    font-weight: 600;
+  }
+
+  & td {
+    text-align: left;
+  }
+
+  & td,
+  & th {
+    border: 1px solid #dadada;
+    padding: 6px;
+    color: #666;
+  }
+}
