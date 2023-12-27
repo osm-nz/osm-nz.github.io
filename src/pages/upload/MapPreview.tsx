@@ -4,48 +4,21 @@ import { FeatureGroup, MapContainer, Polygon } from 'react-leaflet';
 import { type FeatureGroup as IFeatureGroup, LatLngBounds } from 'leaflet';
 import { Layers } from '../map/Layers';
 import type { FetchCache } from './util';
-import { recurseToNodes } from './helpers/recurseToNodes';
-
-/**
- * For osmPatch files, we have access to all the ways/relation
- * members from when we ran the diff. So we can use that data.
- *
- * But for osmChange files,
- * this doesn't work for ways or relations, so it's pretty dumb.
- * It only considers the nodes that exist in the osmChange file.
- * See https://wiki.osm.org/API_v0.6#Bounding_box_computation
- */
-function getCsBbox(osmChange: OsmChange, fetchCache: FetchCache | undefined) {
-  const bbox = {
-    minLat: Infinity,
-    minLng: Infinity,
-    maxLat: -Infinity,
-    maxLng: -Infinity,
-  };
-
-  const filteredNodes = Object.values(osmChange)
-    .flat()
-    .flatMap((x) => recurseToNodes(x, fetchCache));
-
-  for (const node of filteredNodes) {
-    if (node.lat < bbox.minLat) bbox.minLat = node.lat;
-    if (node.lon < bbox.minLng) bbox.minLng = node.lon;
-    if (node.lat > bbox.maxLat) bbox.maxLat = node.lat;
-    if (node.lon > bbox.maxLng) bbox.maxLng = node.lon;
-  }
-
-  return bbox;
-}
+import { type Bbox, getCsBbox } from './helpers/bbox';
 
 export const MapPreview: React.FC<{
   diff: OsmChange;
   fetchCache: FetchCache | undefined;
-}> = ({ diff, fetchCache }) => {
+  bboxFromOsmPatch: Bbox | undefined;
+}> = ({ diff, fetchCache, bboxFromOsmPatch }) => {
   const polygonGroup = useRef<IFeatureGroup>(null);
 
   // TODO: react hook to download all nodes of ways/relations that were touched
   // for small features. Render each feature on the map
-  const bbox = useMemo(() => getCsBbox(diff, fetchCache), [diff, fetchCache]);
+  const bbox = useMemo(
+    () => getCsBbox(diff, fetchCache, bboxFromOsmPatch),
+    [diff, fetchCache, bboxFromOsmPatch],
+  );
 
   if (Object.values(bbox).some((n) => !Number.isFinite(n))) {
     return <>No preview available</>;

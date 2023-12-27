@@ -15,6 +15,7 @@ import { createOsmChangeFromPatchFile } from './createOsmChangeFromPatchFile';
 import './Upload.css';
 import { type FetchCache, downloadFile } from './util';
 import { RelationMemberChanges } from './RelationMemberChanges';
+import type { Bbox } from './helpers/bbox';
 
 const DEFAULT_TAGS = {
   attribution: 'https://wiki.openstreetmap.org/wiki/Contributors#LINZ',
@@ -57,6 +58,7 @@ const UploadInner: React.FC = () => {
   const [fetchCache, setFetchCache] = useState<FetchCache>();
   const [fileName, setFileName] = useState<string>();
   const [messages, setMessages] = useState<string[]>([]);
+  const [bboxFromOsmPatch, setBboxFromOsmPatch] = useState<Bbox>();
 
   const input = useRef<HTMLInputElement>(null);
 
@@ -129,8 +131,10 @@ const UploadInner: React.FC = () => {
 
       setMessages([...instructions]);
 
-      const { osmChange, fetched } = await createOsmChangeFromPatchFile(merged);
+      const { osmChange, fetched, bbox } =
+        await createOsmChangeFromPatchFile(merged);
       setFetchCache(fetched);
+      setBboxFromOsmPatch(bbox);
       return setDiff(osmChange);
     } catch (ex) {
       console.error(ex);
@@ -232,7 +236,11 @@ const UploadInner: React.FC = () => {
           <PlusMinus diff={diff} />
           <strong>Approximate Extent of nodes:</strong>
           <br />
-          <MapPreview diff={diff} fetchCache={fetchCache} />
+          <MapPreview
+            diff={diff}
+            fetchCache={fetchCache}
+            bboxFromOsmPatch={bboxFromOsmPatch}
+          />
           <br />
           <br />
           <strong>Tag Changes:</strong>

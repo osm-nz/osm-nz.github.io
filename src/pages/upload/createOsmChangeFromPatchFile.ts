@@ -11,6 +11,7 @@ import type {
 import { MAP, type NWR } from '../HistoryRestorer/util';
 import type { OsmPatch } from '../../types';
 import { type FetchCache, fetchChunked } from './util';
+import { type Bbox, getGeoJsonBbox } from './helpers/bbox';
 
 window.structuredClone ||= (x) => JSON.parse(JSON.stringify(x));
 
@@ -227,7 +228,7 @@ function updateRelationMembers(
 
 export async function createOsmChangeFromPatchFile(
   osmPatch: OsmPatch,
-): Promise<{ osmChange: OsmChange; fetched: FetchCache }> {
+): Promise<{ osmChange: OsmChange; fetched: FetchCache; bbox: Bbox }> {
   const osmChange: OsmChange = {
     create: [],
     delete: [],
@@ -297,5 +298,7 @@ export async function createOsmChangeFromPatchFile(
     }
   }
 
-  return { osmChange, fetched };
+  const bbox = getGeoJsonBbox(osmPatch);
+
+  return { osmChange, fetched, bbox };
 }
