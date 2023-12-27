@@ -1,9 +1,9 @@
 const presetsPromise = fetch(
-  `https://cdn.jsdelivr.net/gh/openstreetmap/id-tagging-schema@main/dist/presets.min.json`,
+  'https://cdn.jsdelivr.net/gh/openstreetmap/id-tagging-schema@main/dist/presets.min.json',
 ).then((r) => r.json());
 
 const presetNamesPromise = fetch(
-  `https://cdn.jsdelivr.net/gh/openstreetmap/id-tagging-schema@main/dist/translations/en.min.json`,
+  'https://cdn.jsdelivr.net/gh/openstreetmap/id-tagging-schema@main/dist/translations/en.min.json',
 ).then((r) => r.json());
 
 export async function getPreset(
@@ -20,7 +20,7 @@ export async function getPreset(
   for (const presetId in presets) {
     const { matchScore, tags: theseTags } = presets[presetId];
     const match =
-      Object.keys(theseTags).length &&
+      !!Object.keys(theseTags).length &&
       Object.entries(theseTags).every(
         ([k, v]) => k in tags && (v === '*' || v === tags[k]),
       );

@@ -1,4 +1,4 @@
-import { TileLayer, LayersControl } from 'react-leaflet';
+import { LayersControl, TileLayer } from 'react-leaflet';
 
 export const Layers: React.FC = () => (
   <LayersControl position="topright">

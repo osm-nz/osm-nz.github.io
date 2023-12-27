@@ -1,19 +1,19 @@
 import { useContext, useRef, useState } from 'react';
 import {
-  OsmChange,
+  type OsmChange,
   createOsmChangeXml,
   parseOsmChangeXml,
   uploadChangeset,
 } from 'osm-api';
 import { parse } from 'jsonc-parser';
 import { AuthContext, AuthGateway } from '../../wrappers';
-import { OsmPatch, Tags } from '../../types';
+import type { OsmPatch, Tags } from '../../types';
 import { MapPreview } from './MapPreview';
 import { TagChanges } from './TagChanges';
 import { PlusMinus } from './PlusMinus';
 import { createOsmChangeFromPatchFile } from './createOsmChangeFromPatchFile';
 import './Upload.css';
-import { FetchCache, downloadFile } from './util';
+import { type FetchCache, downloadFile } from './util';
 import { RelationMemberChanges } from './RelationMemberChanges';
 
 const DEFAULT_TAGS = {

@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
-import { OsmChange } from 'osm-api';
-import { FetchCache, ToFetch, fetchChunked } from './util';
+import type { OsmChange } from 'osm-api';
+import { type FetchCache, type ToFetch, fetchChunked } from './util';
 
 type SimpleRecord = {
   [key: string]: { [value: string]: number };

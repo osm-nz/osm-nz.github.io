@@ -1,4 +1,4 @@
-import { OsmFeature, OsmFeatureType, getFeatures } from 'osm-api';
+import { type OsmFeature, type OsmFeatureType, getFeatures } from 'osm-api';
 
 export function* chunk<T>(array: T[], limit: number): Generator<T[], void> {
   for (let index = 0; index < array.length; index += limit) {

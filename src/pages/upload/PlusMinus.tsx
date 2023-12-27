@@ -1,4 +1,4 @@
-import { OsmChange } from 'osm-api';
+import type { OsmChange } from 'osm-api';
 
 export const PlusMinus: React.FC<{ diff: OsmChange }> = ({ diff }) => {
   return (

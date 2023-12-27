@@ -1,4 +1,4 @@
-import { PropsWithChildren, Component } from 'react';
+import { Component, type PropsWithChildren } from 'react';
 
 /* eslint-disable react/destructuring-assignment */
 export class MapErrorBoundary extends Component<

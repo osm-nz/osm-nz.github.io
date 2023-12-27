@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Line, Serie } from '@nivo/line';
-import { ADDRESS_CATEGORIES, AddressCategory } from './addressCategories';
+import { useEffect, useMemo, useState } from 'react';
+import { Line, type Serie } from '@nivo/line';
+import { ADDRESS_CATEGORIES, type AddressCategory } from './addressCategories';
 
 type MarkdownTableRow = {
   [K in AddressCategory]: string;

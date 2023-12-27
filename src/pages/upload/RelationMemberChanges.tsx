@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { OsmChange, OsmRelation } from 'osm-api';
-import { diffLines, Change } from 'diff';
-import { FetchCache, ToFetch, fetchChunked } from './util';
+import type { OsmChange, OsmRelation } from 'osm-api';
+import { type Change, diffLines } from 'diff';
+import { type FetchCache, type ToFetch, fetchChunked } from './util';
 
 type MemberChanges = {
   [nwrId: string]: Change[];

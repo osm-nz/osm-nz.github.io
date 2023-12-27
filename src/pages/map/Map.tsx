@@ -1,6 +1,6 @@
-import { useEffect, useState, Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { MapContainer, Polygon, Tooltip } from 'react-leaflet';
-import { LeafletMouseEvent } from 'leaflet';
+import type { LeafletMouseEvent } from 'leaflet';
 import { uniqBy } from '../../helpers';
 import { Layers } from './Layers';
 import { MapErrorBoundary } from './MapErrorBoundary';
@@ -62,18 +62,18 @@ function getColor(d: number) {
   return d > 1000
     ? '#3a0000'
     : d > 500
-    ? '#67001f'
-    : d > 200
-    ? '#980043'
-    : d > 100
-    ? '#ce1256'
-    : d > 60
-    ? '#e7298a'
-    : d > 40
-    ? '#df65b0'
-    : d > 20
-    ? '#c994c7'
-    : '#d4b9da';
+      ? '#67001f'
+      : d > 200
+        ? '#980043'
+        : d > 100
+          ? '#ce1256'
+          : d > 60
+            ? '#e7298a'
+            : d > 40
+              ? '#df65b0'
+              : d > 20
+                ? '#c994c7'
+                : '#d4b9da';
 }
 
 function getPolygon(x: Layer, isLocked: Locked) {

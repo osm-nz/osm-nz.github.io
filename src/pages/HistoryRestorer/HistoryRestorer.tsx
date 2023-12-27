@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { getConfig } from 'osm-api';
 import { AuthContext, AuthGateway } from '../../wrappers';
 import { save, validate } from './api';
-import { Item, NWR, ValidationResult } from './util';
+import type { Item, NWR, ValidationResult } from './util';
 import classes from './HistoryRestorer.module.css';
 
 const NEW_FEATURE = (): Item => ({ type: 'n' });

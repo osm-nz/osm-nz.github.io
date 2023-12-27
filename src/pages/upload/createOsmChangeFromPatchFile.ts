@@ -1,5 +1,5 @@
-import { Geometry, Position } from 'geojson';
-import {
+import type { Geometry, Position } from 'geojson';
+import type {
   OsmBaseFeature,
   OsmChange,
   OsmFeature,
@@ -8,9 +8,9 @@ import {
   OsmRelation,
   OsmWay,
 } from 'osm-api';
-import { MAP, NWR } from '../HistoryRestorer/util';
-import { OsmPatch } from '../../types';
-import { FetchCache, fetchChunked } from './util';
+import { MAP, type NWR } from '../HistoryRestorer/util';
+import type { OsmPatch } from '../../types';
+import { type FetchCache, fetchChunked } from './util';
 
 window.structuredClone ||= (x) => JSON.parse(JSON.stringify(x));
 

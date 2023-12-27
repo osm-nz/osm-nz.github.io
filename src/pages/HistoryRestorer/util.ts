@@ -1,4 +1,4 @@
-import { OsmFeature } from 'osm-api';
+import type { OsmFeature } from 'osm-api';
 
 export type NWR = 'n' | 'w' | 'r';
 export const MAP = <const>{ n: 'node', w: 'way', r: 'relation' };

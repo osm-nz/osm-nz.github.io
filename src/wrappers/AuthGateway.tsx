@@ -1,12 +1,12 @@
 import {
-  useState,
+  type PropsWithChildren,
   createContext,
   useCallback,
-  useMemo,
   useEffect,
-  PropsWithChildren,
+  useMemo,
+  useState,
 } from 'react';
-import { getUser, isLoggedIn, login, logout, OsmOwnUser } from 'osm-api';
+import { type OsmOwnUser, getUser, isLoggedIn, login, logout } from 'osm-api';
 
 type IAuthContext = {
   user: OsmOwnUser;

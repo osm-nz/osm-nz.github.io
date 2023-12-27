@@ -1,5 +1,5 @@
 import { uploadChangeset } from 'osm-api';
-import { ValidationResult } from '../util';
+import type { ValidationResult } from '../util';
 
 // exclude the URL query params
 const host =

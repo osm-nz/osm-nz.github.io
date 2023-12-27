@@ -1,5 +1,5 @@
-import { FeatureCollection, Geometry } from 'geojson';
-import { OsmFeatureType } from 'osm-api';
+import type { FeatureCollection, Geometry } from 'geojson';
+import type { OsmFeatureType } from 'osm-api';
 
 export type Tags = { [key: string]: string };
 
