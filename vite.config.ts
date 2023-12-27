@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 /* eslint-enable import/no-extraneous-dependencies */
 
@@ -12,5 +12,8 @@ export default defineConfig({
   },
   build: {
     outDir: './build',
+  },
+  test: {
+    globals: true,
   },
 });
