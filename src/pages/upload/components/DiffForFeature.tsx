@@ -19,22 +19,31 @@ export const DiffForFeature: React.FC<{
   const type = MAP[`${feature.id}`[0] as keyof typeof MAP];
   const id = +`${feature.id}`.slice(1);
 
-  const allKeys = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [action, , tagDiff] = useMemo(() => {
     const { __action, __members, ...newTags } = feature.properties;
+    return [__action, __members, newTags];
+  }, [feature]);
+
+  const allKeys = useMemo(() => {
     const keys = new Set([
       ...Object.keys(original?.tags || {}),
-      ...Object.keys(newTags),
+      ...Object.keys(tagDiff),
     ]);
 
     // sort alphabetically
     return [...keys].sort((a, b) => a.localeCompare(b));
-  }, [feature, original]);
+  }, [tagDiff, original]);
 
   return (
     <>
       <header style={{ textTransform: 'capitalize' }}>
-        {type} {id} – <OpenInLinks type={type} id={id} />
+        {action ? (
+          <>
+            {type} {id} – <OpenInLinks type={type} id={id} />
+          </>
+        ) : (
+          <>🆕 {feature.id}</>
+        )}
       </header>
       <table className={classes.diffTable}>
         <thead>
