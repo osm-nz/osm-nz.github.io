@@ -62,11 +62,32 @@ const UploadInner: React.FC = () => {
   const [messages, setMessages] = useState<string[]>([]);
   const [osmPatch, setOsmPatch] = useState<OsmPatch>();
   const [bboxFromOsmPatch, setBboxFromOsmPatch] = useState<Bbox>();
-  const [focusedFeature, setFocusedFeature] = useState<OsmPatchFeature>();
+  const [focusedFeatureId, setFocusedFeatureId] = useState<string | number>();
+  const [allowEdit, setAllowEdit] = useState(false);
 
   const input = useRef<HTMLInputElement>(null);
 
+  const focusedFeature = osmPatch?.features.find(
+    (f) => f.id === focusedFeatureId,
+  );
+
   const parsedTags = parseCsTags(csTags);
+
+  async function rebuildOsmChange(merged: OsmPatch) {
+    try {
+      const { osmChange, fetched, bbox } = await createOsmChangeFromPatchFile(
+        merged,
+        fetchCache,
+      );
+      setFetchCache(fetched);
+      setBboxFromOsmPatch(bbox);
+      setOsmPatch(merged);
+      setDiff(osmChange);
+    } catch (ex) {
+      console.error(ex);
+      setError(ex instanceof Error ? ex : new Error(`${ex}`));
+    }
+  }
 
   async function onFileUpload(files: FileList | null) {
     if (!files?.length) {
@@ -134,13 +155,8 @@ const UploadInner: React.FC = () => {
       instructions.delete('');
 
       setMessages([...instructions]);
-
-      const { osmChange, fetched, bbox } =
-        await createOsmChangeFromPatchFile(merged);
-      setFetchCache(fetched);
-      setBboxFromOsmPatch(bbox);
-      setOsmPatch(merged);
-      return setDiff(osmChange);
+      await rebuildOsmChange(merged);
+      return undefined;
     } catch (ex) {
       console.error(ex);
       return setError(ex instanceof Error ? ex : new Error(`${ex}`));
@@ -170,6 +186,25 @@ const UploadInner: React.FC = () => {
     downloadFile(xmlBlob, `${fileName?.split('.')[0]}.osc`);
   }
 
+  async function moveNode(feature: OsmPatchFeature, lat: number, lon: number) {
+    if (!diff || !osmPatch || !feature.osmChangeId) {
+      // eslint-disable-next-line no-alert -- safety checkm, will never happen
+      alert('Could not move feature');
+      return;
+    }
+
+    const newOsmPatch: OsmPatch = {
+      ...osmPatch,
+      features: osmPatch.features.map((f) =>
+        f.id === feature.id
+          ? { ...f, geometry: { type: 'Point', coordinates: [lon, lat] } }
+          : f,
+      ),
+    };
+
+    await rebuildOsmChange(newOsmPatch);
+  }
+
   if (loading) return <h2 className={classes.uploadRoot}>Uploading...</h2>;
 
   return (
@@ -197,7 +232,15 @@ const UploadInner: React.FC = () => {
           <br />
         </>
       )}
-      Logged in as <code>{user.display_name}</code>.{' '}
+      Logged in as{' '}
+      <a
+        href={`https://osm.org/user/${user.display_name}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <code>{user.display_name}</code>
+      </a>
+      .{' '}
       <button type="button" onClick={logout}>
         Logout
       </button>
@@ -253,12 +296,24 @@ const UploadInner: React.FC = () => {
           <br />
           <div style={{ display: 'flex', gap: 16 }}>
             <div>
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control -- rule broken */}
+              <label>
+                <input
+                  type="checkbox"
+                  checked={allowEdit}
+                  className={classes.switch}
+                  onChange={(event) => setAllowEdit(event.target.checked)}
+                />
+                Allow Editting
+              </label>
+
               <MapPreview
                 diff={diff}
                 fetchCache={fetchCache}
                 osmPatch={osmPatch}
                 bboxFromOsmPatch={bboxFromOsmPatch}
-                setFocusedFeature={setFocusedFeature}
+                setFocusedFeatureId={setFocusedFeatureId}
+                moveNode={allowEdit && moveNode}
               />
             </div>
             <div>

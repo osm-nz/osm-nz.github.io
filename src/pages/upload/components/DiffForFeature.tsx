@@ -7,6 +7,7 @@ import { MAP } from '../../HistoryRestorer/util';
 import { AuthContext } from '../../../wrappers';
 import classes from '../Upload.module.css';
 import { OpenInLinks } from './OpenInLinks';
+import { LatLngDiff } from './LatLngDiff';
 
 const EMPTY_CELL = <td>&nbsp;</td>;
 
@@ -154,6 +155,7 @@ export const DiffForFeature: React.FC<{
               </tr>
             );
           })}
+          <LatLngDiff feature={feature} original={original} />
         </tbody>
       </table>
       {type === 'relation' && (

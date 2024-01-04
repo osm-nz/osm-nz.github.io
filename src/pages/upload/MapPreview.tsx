@@ -26,8 +26,19 @@ export const MapPreview: React.FC<{
   osmPatch?: OsmPatch;
   fetchCache: FetchCache | undefined;
   bboxFromOsmPatch: Bbox | undefined;
-  setFocusedFeature(feature: OsmPatchFeature): void;
-}> = ({ diff, osmPatch, fetchCache, bboxFromOsmPatch, setFocusedFeature }) => {
+  setFocusedFeatureId(id: string | number): void;
+  moveNode:
+    | ((feature: OsmPatchFeature, lat: number, lng: number) => void)
+    | false;
+}> = ({
+  diff,
+  osmPatch,
+  fetchCache,
+  bboxFromOsmPatch,
+  setFocusedFeatureId,
+  moveNode,
+}) => {
+  const allowEdit = !!moveNode;
   const polygonGroup = useRef<IFeatureGroup>(null);
 
   const bbox = useMemo(
@@ -39,10 +50,19 @@ export const MapPreview: React.FC<{
     return <>No preview available</>;
   }
 
+  const onDragEnd = (event: L.DragEndEvent, feature: OsmPatchFeature) => {
+    if (!allowEdit) return;
+
+    const marker: L.Marker = event.target;
+    const position = marker.getLatLng();
+    moveNode(feature, position.lat, position.lng);
+  };
+
   return (
     <MapContainer
-      style={{ width: 500, height: 500, margin: 'auto' }}
+      style={{ width: '50vw', height: '50vw', margin: 'auto' }}
       scrollWheelZoom
+      maxZoom={21}
       bounds={
         new LatLngBounds(
           { lat: bbox.minLat, lng: bbox.minLng },
@@ -80,7 +100,12 @@ export const MapPreview: React.FC<{
                   position={{ lat, lng }}
                   key={feature.id}
                   icon={ICONS[colour]}
-                  eventHandlers={{ click: () => setFocusedFeature(feature) }}
+                  eventHandlers={{
+                    click: () => setFocusedFeatureId(feature.id!),
+                    dragstart: () => setFocusedFeatureId(feature.id!),
+                    dragend: (event) => onDragEnd(event, feature),
+                  }}
+                  draggable={allowEdit && !feature.properties.__action}
                 />
               );
             }
@@ -90,7 +115,9 @@ export const MapPreview: React.FC<{
                 key={feature.id}
                 data={feature}
                 pathOptions={{ color: colour }}
-                eventHandlers={{ click: () => setFocusedFeature(feature) }}
+                eventHandlers={{
+                  click: () => setFocusedFeatureId(feature.id!),
+                }}
               />
             );
           })}

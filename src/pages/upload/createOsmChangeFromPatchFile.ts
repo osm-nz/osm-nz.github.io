@@ -64,6 +64,10 @@ const coordToNode = (v: Position): OsmNode => ({
   lon: v[0],
 });
 
+/**
+ * IMPORTANT: THe first feature in the returned array is the "main" feature,
+ * i.e. the one with the tags
+ */
 function geojsonToOsmGeometry(
   geom: Geometry,
   baseFeature: Omit<OsmBaseFeature, 'type' | 'id'>,
@@ -228,6 +232,7 @@ function updateRelationMembers(
 
 export async function createOsmChangeFromPatchFile(
   osmPatch: OsmPatch,
+  existingCache: FetchCache | undefined,
 ): Promise<{ osmChange: OsmChange; fetched: FetchCache; bbox: Bbox }> {
   const osmChange: OsmChange = {
     create: [],
@@ -249,7 +254,7 @@ export async function createOsmChangeFromPatchFile(
     }
   }
 
-  const fetched = await fetchChunked(toFetch);
+  const fetched = await fetchChunked(toFetch, existingCache);
 
   for (const f of osmPatch.features) {
     const { __action, __members: relationMembers, ...tags } = f.properties;
@@ -291,6 +296,8 @@ export async function createOsmChangeFromPatchFile(
         );
         if (features) {
           osmChange.create.push(...features);
+          const [mainFeature] = features;
+          f.osmChangeId = mainFeature.type + mainFeature.id;
         } else {
           console.warn(`Can't create a ${f.geometry.type}`);
         }
