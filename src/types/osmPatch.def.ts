@@ -1,15 +1,11 @@
-import type { Feature, Geometry } from 'geojson';
-import type { OsmFeatureType } from 'osm-api';
+import type {
+  OsmPatch as _OsmPatch,
+  OsmPatchFeature as _OsmPatchFeature,
+} from 'osm-api';
 
-export type Tags = { [key: string]: string };
+export type { Tags } from 'osm-api';
 
-export type OsmPatchFeature = Feature<
-  Geometry,
-  Tags & {
-    __action?: 'edit' | 'move' | 'delete';
-    __members?: { type: OsmFeatureType; ref: number; role: string }[];
-  }
-> & {
+export type OsmPatchFeature = _OsmPatchFeature & {
   /**
    * temporarily added by this app, when we're creating features they don't
    * have a nwrId yet, so we need a way to match features between the osmPatch
@@ -18,11 +14,6 @@ export type OsmPatchFeature = Feature<
   osmChangeId?: string;
 };
 
-export type OsmPatch = {
-  type: 'FeatureCollection';
+export type OsmPatch = Omit<_OsmPatch, 'features'> & {
   features: OsmPatchFeature[];
-  __comment?: string;
-  size?: 'small' | 'medium' | 'large';
-  instructions?: string;
-  changesetTags?: Tags;
 };
