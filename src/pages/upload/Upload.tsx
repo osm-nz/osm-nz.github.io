@@ -108,6 +108,8 @@ const UploadInner: React.FC = () => {
         }
         const xml = await files[0].text();
         const json = parseOsmChangeXml(xml);
+        // @ts-expect-error -- typedefs wrong
+        if (json.changeset) setCsTags(tagsToStr(json.changeset));
         return setDiff(json);
       }
       // else, this is a osmPatch file
@@ -181,7 +183,7 @@ const UploadInner: React.FC = () => {
   }
 
   function downloadOsc() {
-    const xml = createOsmChangeXml(-1, diff!);
+    const xml = createOsmChangeXml(-1, diff!, parsedTags);
     const xmlBlob = new Blob([xml], { type: 'application/xml' });
     downloadFile(xmlBlob, `${fileName?.split('.')[0]}.osc`);
   }
