@@ -6,8 +6,10 @@ import type { OsmPatchFeature } from '../../../types';
 import { MAP } from '../../HistoryRestorer/util';
 import { AuthContext } from '../../../wrappers';
 import classes from '../Upload.module.css';
+import { useTag2link } from '../../../hooks/useTag2link';
 import { OpenInLinks } from './OpenInLinks';
 import { LatLngDiff } from './LatLngDiff';
+import { MaybeLink } from './MaybeLink';
 
 const EMPTY_CELL = <td>&nbsp;</td>;
 
@@ -15,6 +17,7 @@ export const DiffForFeature: React.FC<{
   feature: OsmPatchFeature;
   original: OsmFeature | undefined;
 }> = ({ feature, original }) => {
+  const tag2link = useTag2link();
   const { user: me } = useContext(AuthContext);
 
   const type = MAP[`${feature.id}`[0] as keyof typeof MAP];
@@ -141,6 +144,8 @@ export const DiffForFeature: React.FC<{
                 : classes.removed
               : classes.added;
 
+            const formatter = tag2link?.get(key);
+
             return (
               <tr key={key}>
                 <td>{key}</td>
@@ -149,9 +154,11 @@ export const DiffForFeature: React.FC<{
                     colour === classes.changedNew ? classes.changedOld : ''
                   }
                 >
-                  {originalValue}
+                  <MaybeLink value={originalValue} formatter={formatter} />
                 </td>
-                <td className={colour}>{newValue}</td>
+                <td className={colour}>
+                  <MaybeLink value={newValue} formatter={formatter} />
+                </td>
               </tr>
             );
           })}
