@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { MapContainer, Polygon, Tooltip } from 'react-leaflet';
 import type { LeafletMouseEvent } from 'leaflet';
 import { uniqBy } from '../../helpers';
+import { downloadFile } from '../upload/util';
 import { Layers } from './Layers';
 import { MapErrorBoundary } from './MapErrorBoundary';
 
@@ -55,6 +56,11 @@ function returnToRapiD(id: string, locked: Locked) {
 
   window.opener.postMessage(`ADD_SECTOR=${id}`);
   window.close();
+}
+
+async function downloadLayer(layer: Layer) {
+  const blob = await fetch(layer.url).then((r) => r.blob());
+  downloadFile(blob, layer.url.split('/').at(-1)!);
 }
 
 // Return a deeper red for changesets with more changes
@@ -216,6 +222,7 @@ export const Map: React.FC = () => {
                   eventHandlers={{
                     click: () => {
                       if (fromRapiD) returnToRapiD(x.id, data[1][x.id]);
+                      else downloadLayer(x);
                     },
                     contextmenu: () =>
                       setLayersToHide((existing) => [...existing, x.id]),
