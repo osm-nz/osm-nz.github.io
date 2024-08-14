@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import { useContext, useMemo } from 'react';
 import TimeAgo from 'react-timeago-i18n';
 import type { OsmFeature } from 'osm-api';

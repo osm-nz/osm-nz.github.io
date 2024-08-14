@@ -298,7 +298,6 @@ const UploadInner: React.FC = () => {
           <br />
           <div style={{ display: 'flex', gap: 16 }}>
             <div>
-              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control -- rule broken */}
               <label>
                 <input
                   type="checkbox"

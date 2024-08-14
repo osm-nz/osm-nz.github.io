@@ -222,7 +222,6 @@ const HistoryRestorerInner: React.FC = () => {
       <br />
       <br />
       Logged in as <code>{user.display_name}</code>.{' '}
-      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/anchor-is-valid */}
       <a onClick={logout}>Logout</a>
     </div>
   );

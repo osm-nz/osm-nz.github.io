@@ -24,30 +24,17 @@
     "@types/react": "^18.2.18",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.4",
-    "eslint": "^8.56.0",
-    "eslint-config-kyle": "^17.0.2",
+    "eslint": "^9.9.0",
+    "eslint-config-kyle": "^25.0.0-beta2",
     "typescript": "^5.1.6",
     "vite": "^4.4.8",
     "vitest": "^0.34.6"
   },
   "scripts": {
-    "lint": "eslint --ext .ts,.tsx,.js --ignore-path .gitignore . && tsc",
+    "lint": "eslint . && tsc",
     "test": "vitest",
     "start": "vite",
     "build": "vite build"
-  },
-  "eslintConfig": {
-    "extends": "kyle",
-    "settings": {
-      "jest": {
-        "version": 28
-      }
-    },
-    "rules": {
-      "unicorn/no-unreadable-array-destructuring": "off",
-      "@typescript-eslint/no-dynamic-delete": "off",
-      "no-lonely-if": "off"
-    }
   },
   "prettier": "eslint-config-kyle/prettier",
   "browserslist": [

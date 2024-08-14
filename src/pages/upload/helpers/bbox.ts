@@ -49,6 +49,7 @@ export function getGeoJsonBbox(osmPatch: OsmPatch): Bbox {
   const allCoords: number[] = [];
   for (const f of osmPatch.features) {
     if ('coordinates' in f.geometry) {
+      // eslint-disable-next-line unicorn/no-magic-array-flat-depth -- Position[][][] -> Position
       const flatCoords = f.geometry.coordinates.flat(3);
       allCoords.push(...flatCoords);
     }

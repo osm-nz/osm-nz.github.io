@@ -13,6 +13,7 @@ type IAuthContext = {
   logout(): void;
 };
 export const AuthContext = createContext({} as IAuthContext);
+AuthContext.displayName = 'AuthContext';
 
 export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
   const [error, setError] = useState<Error>();

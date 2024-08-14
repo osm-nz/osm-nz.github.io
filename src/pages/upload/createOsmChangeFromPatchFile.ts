@@ -13,6 +13,7 @@ import type { OsmPatch } from '../../types';
 import { type FetchCache, fetchChunked } from './util';
 import { type Bbox, getGeoJsonBbox } from './helpers/bbox';
 
+// eslint-disable-next-line unicorn/prefer-structured-clone
 window.structuredClone ||= (x) => JSON.parse(JSON.stringify(x));
 
 const TEMPLATE_OSM_FEATURE: Omit<OsmFeature, 'id' | 'type'> = {

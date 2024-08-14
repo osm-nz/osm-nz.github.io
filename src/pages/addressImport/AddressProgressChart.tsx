@@ -47,7 +47,7 @@ export const AddressProgressChart: React.FC = () => {
       // .filter((cat) => cat !== 'PERFECT' && cat !== 'TOTALLY_MISSING')
       .map(([_addressCategory, categoryInfo]): Serie => {
         const addressCategory = _addressCategory as AddressCategory; // TS is dumb
-        const [, , , colour] = categoryInfo;
+        const colour = categoryInfo[3];
 
         return {
           id: addressCategory,

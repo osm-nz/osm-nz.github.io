@@ -13,6 +13,7 @@ import './index.css';
 
 const getCurrentRoute = () => window.location.hash.slice(1);
 
+// eslint-disable-next-line no-useless-assignment -- false positive
 const App: React.FC = () => {
   const [path, setPath] = useState<string>(getCurrentRoute());
 
