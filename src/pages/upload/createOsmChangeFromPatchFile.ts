@@ -149,11 +149,57 @@ function geojsonToOsmGeometry(
       return [relation];
     }
 
-    // TODO: support other geometries
+    // this logic is based on what RapiD uses:
+    // https://github.com/facebookincubator/Rapid/blob/8a58b2/modules/services/esri_data.js#L103-L134
     case 'Polygon':
     case 'MultiPolygon': {
-      return undefined;
+      const nodes: OsmNode[] = [];
+      const ways: { way: OsmWay; role: string }[] = [];
+
+      const groups =
+        geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+
+      for (const rings of groups) {
+        for (const [index, ring] of rings.entries()) {
+          const ringNodes = ring.map(coordToNode);
+          if (ringNodes.length < 3) return [];
+
+          const first = ringNodes[0];
+          const last = ringNodes.at(-1);
+          if (first !== last) ringNodes.push(first); // sanity check, ensure rings are closed
+
+          const way: OsmWay = {
+            ...TEMPLATE_OSM_FEATURE,
+            type: 'way',
+            id: nextId.way--,
+            nodes: ringNodes.map((n) => n.id),
+          };
+          nodes.push(...ringNodes);
+          ways.push({ way, role: index === 0 ? 'outer' : 'inner' });
+        }
+
+        if (groups.length === 1 && rings.length === 1) {
+          // special case: only 1 ring, so we don't need a multipolygon,
+          // we can just create a simple way and abort early.
+          const way: OsmWay = { ...baseFeature, ...ways[0].way };
+          return [way, ...nodes];
+        }
+      }
+
+      const relation: OsmRelation = {
+        ...baseFeature,
+        tags: { type: 'multipolygon', ...baseFeature.tags },
+        type: 'relation',
+        id: nextId.relation--,
+        members: ways.map(({ way, role }) => ({
+          type: 'way',
+          ref: way.id,
+          role,
+        })),
+      };
+      return [relation, ...ways.map((w) => w.way), ...nodes];
     }
+
     default: {
       return undefined;
     }
