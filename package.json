@@ -37,9 +37,5 @@
     "build": "vite build"
   },
   "prettier": "eslint-config-kyle/prettier",
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ]
+  "packageManager": "yarn@1.22.22"
 }

@@ -74,3 +74,15 @@
   width: 24px;
   height: 24px;
 }
+
+.clickable {
+  cursor: pointer;
+  transition: all 0.1s ease-in;
+  &:hover {
+    box-shadow: 0 2px 2px #dadada;
+  }
+}
+
+.tabHint {
+  padding: 2px;
+}

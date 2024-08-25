@@ -1,11 +1,19 @@
-import { Fragment, useEffect, useState } from 'react';
+import {
+  Fragment,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import clsx from 'clsx';
-import type { OsmChange } from 'osm-api';
+import type { OsmChange, OsmFeature } from 'osm-api';
+import type { OsmId } from '../../types';
 import { type FetchCache, type ToFetch, fetchChunked } from './util';
 import classes from './Upload.module.css';
 
 type SimpleRecord = {
-  [key: string]: { [value: string]: number };
+  [key: string]: { [value: string]: OsmId[] };
 };
 
 type Change = {
@@ -16,6 +24,14 @@ type Change = {
 };
 
 const ARROW = '→';
+
+const createId = (feature: OsmFeature) =>
+  (feature.type[0] + feature.id) as OsmId;
+
+const TagChangeContext = createContext(
+  undefined as never as (id: OsmId) => void,
+);
+TagChangeContext.displayName = 'TagChangeContext';
 
 async function calcTagChanges(
   diff: OsmChange,
@@ -33,8 +49,8 @@ async function calcTagChanges(
       for (const key in f.tags) {
         const value = f.tags[key];
         out.added[key] ||= {};
-        out.added[key][value] ||= 0;
-        out.added[key][value] += 1;
+        out.added[key][value] ||= [];
+        out.added[key][value].push(createId(f));
       }
     }
   }
@@ -44,8 +60,8 @@ async function calcTagChanges(
       for (const key in f.tags) {
         const value = f.tags[key];
         out.featureDeleted[key] ||= {};
-        out.featureDeleted[key][value] ||= 0;
-        out.featureDeleted[key][value] += 1;
+        out.featureDeleted[key][value] ||= [];
+        out.featureDeleted[key][value].push(createId(f));
       }
     }
   }
@@ -69,22 +85,22 @@ async function calcTagChanges(
         // added
         const value = newTags[key];
         out.added[key] ||= {};
-        out.added[key][value] ||= 0;
-        out.added[key][value] += 1;
+        out.added[key][value] ||= [];
+        out.added[key][value].push(createId(f));
       } else if (!newTags[key] && oldTags[key]) {
         // removed
         const value = oldTags[key];
         out.removed[key] ||= {};
-        out.removed[key][value] ||= 0;
-        out.removed[key][value] += 1;
+        out.removed[key][value] ||= [];
+        out.removed[key][value].push(createId(f));
       } else if (newTags[key] !== oldTags[key]) {
         // value changed
 
         const value = `${oldTags[key]} ${ARROW} ${newTags[key]}`;
 
         out.changed[key] ||= {};
-        out.changed[key][value] ||= 0;
-        out.changed[key][value] += 1;
+        out.changed[key][value] ||= [];
+        out.changed[key][value].push(createId(f));
       }
     }
   }
@@ -92,21 +108,63 @@ async function calcTagChanges(
   return out;
 }
 
-const RenderValue: React.FC<{ value: string; className: string }> = ({
-  value,
-  className,
-}) => {
+const RenderValue: React.FC<{
+  value: string;
+  className: string;
+  ids: OsmId[];
+}> = ({ value, className, ids }) => {
+  const [index, setIndex] = useState(0);
+  const setFocusedFeatureId = useContext(TagChangeContext);
+
+  const props = useMemo(() => {
+    return {
+      onClick: () => {
+        setIndex((c) => {
+          setTimeout(() => setFocusedFeatureId(ids[c]), 0);
+          return (c + 1) % ids.length;
+        });
+      },
+      // prevent selection on double click
+      onMouseDown: (event) => event.detail > 1 && event.preventDefault(),
+    } satisfies React.ComponentProps<'span'>;
+  }, [ids, setFocusedFeatureId]);
+
+  const isActive = !!index;
+  const suffix = isActive && (
+    <span
+      className={classes.tabHint}
+      title="Click here or press \ to jump to the next feature"
+    >
+      ⌥ [{index - 1}/{ids.length}]
+    </span>
+  );
+
+  useEffect(() => {
+    const onTab = (event: KeyboardEvent) => {
+      if (!isActive) return;
+      if (event.key === '\\') props.onClick();
+    };
+    document.addEventListener('keyup', onTab);
+    return () => document.removeEventListener('keyup', onTab);
+  }, [props, isActive]);
+
   if (value.includes(ARROW)) {
     const [before, after] = value.split(ARROW);
     return (
-      <span>
+      <span className={classes.clickable} {...props}>
         <code className={classes.changedOld}>{before.trim()}</code> {ARROW}{' '}
         <code className={classes.changedNew}>{after.trim()}</code>
+        {suffix}
       </span>
     );
   }
 
-  return <code className={className}>{value}</code>;
+  return (
+    <span className={classes.clickable} {...props}>
+      <code className={className}>{value}</code>
+      {suffix}
+    </span>
+  );
 };
 
 const renderSimpleSection = (
@@ -120,22 +178,22 @@ const renderSimpleSection = (
     let keyCount: React.ReactNode;
     let children: React.ReactNode;
     if (tags.length > 1) {
-      const allAre1 = tags.every(([, count]) => count === 1);
+      const allAre1 = tags.every(([, ids]) => ids.length === 1);
       if (allAre1) {
-        children = tags.map(([value], index) => (
+        children = tags.map(([value, ids], index) => (
           <Fragment key={value}>
             {!!index && '/'}
-            <RenderValue value={value} className={className} />
+            <RenderValue value={value} className={className} ids={ids} />
           </Fragment>
         ));
         keyCount = ` (${tags.length})`;
       } else {
         children = (
           <ul>
-            {tags.map(([value, count]) => (
+            {tags.map(([value, ids]) => (
               <li key={value}>
-                <RenderValue value={value} className={className} />
-                {count > 1 && `(${count})`}
+                <RenderValue value={value} className={className} ids={ids} />
+                {ids.length > 1 && `(${ids.length})`}
               </li>
             ))}
           </ul>
@@ -143,8 +201,14 @@ const renderSimpleSection = (
         keyCount = '';
       }
     } else {
-      children = <RenderValue value={tags[0][0]} className={className} />;
-      keyCount = ` (${tags[0][1]})`;
+      children = (
+        <RenderValue
+          value={tags[0][0]}
+          className={className}
+          ids={tags[0][1]}
+        />
+      );
+      keyCount = ` (${tags[0][1].length})`;
     }
     return (
       <li key={className + key}>
@@ -158,7 +222,8 @@ const renderSimpleSection = (
 export const TagChanges: React.FC<{
   diff: OsmChange;
   fetchCache: FetchCache | undefined;
-}> = ({ diff, fetchCache }) => {
+  setFocusedFeatureId(id: OsmId): void;
+}> = ({ diff, fetchCache, setFocusedFeatureId }) => {
   const [error, setError] = useState<Error>();
   const [changes, setChanges] = useState<Change>();
 
@@ -177,11 +242,17 @@ export const TagChanges: React.FC<{
   }
 
   return (
-    <ul className={classes.tagChanges}>
-      {renderSimpleSection(changes.added, classes.added, 'Added')}
-      {renderSimpleSection(changes.changed, classes.changedOld, 'Changed')}
-      {renderSimpleSection(changes.removed, classes.removed, 'Removed')}
-      {renderSimpleSection(changes.featureDeleted, classes.deleted, 'Deleted')}
-    </ul>
+    <TagChangeContext.Provider value={setFocusedFeatureId}>
+      <ul className={classes.tagChanges}>
+        {renderSimpleSection(changes.added, classes.added, 'Added')}
+        {renderSimpleSection(changes.changed, classes.changedOld, 'Changed')}
+        {renderSimpleSection(changes.removed, classes.removed, 'Removed')}
+        {renderSimpleSection(
+          changes.featureDeleted,
+          classes.deleted,
+          'Deleted',
+        )}
+      </ul>
+    </TagChangeContext.Provider>
   );
 };

@@ -332,7 +332,11 @@ const UploadInner: React.FC = () => {
           <br />
           <strong>All Tag Changes:</strong>
           <br />
-          <TagChanges diff={diff} fetchCache={fetchCache} />
+          <TagChanges
+            diff={diff}
+            fetchCache={fetchCache}
+            setFocusedFeatureId={setFocusedFeatureId}
+          />
           <RelationMemberChanges diff={diff} fetchCache={fetchCache} />
           <br />
           <br />

@@ -5,6 +5,8 @@ import type {
 
 export type { Tags } from 'osm-api';
 
+export type OsmId = `${'n' | 'w' | 'r'}${number}`;
+
 export type OsmPatchFeature = _OsmPatchFeature & {
   /**
    * temporarily added by this app, when we're creating features they don't
