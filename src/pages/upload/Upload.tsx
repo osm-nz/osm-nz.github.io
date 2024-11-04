@@ -34,8 +34,8 @@ function parseCsTags(str: string): Record<string, string> | undefined {
         .split('\n')
         .map((x) => {
           if (!x) return [];
-          const [k, v] = x.split('=');
-          return [k.trim(), v];
+          const [k, ...v] = x.split('=');
+          return [k.trim(), v.join('=')];
         })
         .filter(([k, v]) => k && v),
     );
