@@ -3,17 +3,15 @@ import { MapContainer, Polygon, Tooltip } from 'react-leaflet';
 import type { LeafletMouseEvent } from 'leaflet';
 import { uniqBy } from '../../helpers';
 import { downloadFile } from '../upload/util';
+import { CDN_BASE_URL } from '../../helpers/const';
 import { Layers } from './Layers';
 import { MapErrorBoundary } from './MapErrorBoundary';
 
 import 'leaflet/dist/leaflet.css';
 
-const baseUrl = 'https://linz-addr-cdn.kyle.kiwi';
-
 // if rapid has opened this page in a popup
 const fromRapiD = !!window.opener;
 
-type Locked = undefined | [user: string, minutes: 'done' | number];
 type BBox = [
   [minLng: number, minLat: number],
   [maxLng: number, maxLat: number],
@@ -31,29 +29,11 @@ type Layer = {
   url: string;
 };
 
-type Data = [
-  layers: {
-    results: Layer[];
-  },
-  locked: {
-    [datasetId: string]: Locked;
-  },
-];
+type Data = {
+  results: Layer[];
+};
 
-function returnToRapiD(id: string, locked: Locked) {
-  if (locked) {
-    const [user, minutesAgo] = locked;
-    const suffix =
-      'Check back in a day.\n\nIf you continue, you might override or duplicate their work!';
-    const message =
-      minutesAgo === 'done'
-        ? `This dataset may already have been uploaded by someone else! ${suffix}`
-        : `Someone else (${user}) started editing this dataset ${minutesAgo} minutes ago. ${suffix}`;
-
-    // eslint-disable-next-line no-restricted-globals, no-alert
-    if (!confirm(message)) return;
-  }
-
+function returnToRapiD(id: string) {
   window.opener.postMessage(`ADD_SECTOR=${id}`);
   window.close();
 }
@@ -82,8 +62,8 @@ function getColor(d: number) {
                 : '#d4b9da';
 }
 
-function getPolygon(x: Layer, isLocked: Locked) {
-  const color = isLocked ? '#aaaaaa' : getColor(x.totalCount);
+function getPolygon(x: Layer) {
+  const color = getColor(x.totalCount);
   const fillOpacity = 0.3;
   const stroke = true;
   const opacity = 1;
@@ -120,11 +100,6 @@ function bboxToPoly([[minLng, minLat], [maxLng, maxLat]]: BBox): [
     [minLat, minLng], // SW
   ];
 }
-const headers = {
-  Expires: 'Tue, 01 Jan 1980 1:00:00 GMT',
-  'Cache-Control': 'no-cache, no-store, max-age=0',
-  Pragma: 'no-cache',
-};
 
 export const Map: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -134,14 +109,8 @@ export const Map: React.FC = () => {
   const [layersToHide, setLayersToHide] = useState<string[]>([]);
 
   useEffect(() => {
-    Promise.all([
-      fetch(`${baseUrl}/index.json?nocache=${Math.random()}`, { headers }).then(
-        (r) => r.json(),
-      ),
-      fetch(`${baseUrl}/__locked?nocache=${Math.random()}`, { headers })
-        .then((r) => r.json())
-        .catch(() => ({})),
-    ])
+    fetch(`${CDN_BASE_URL}/index.json`)
+      .then((r) => r.json())
       .then(setData)
       .catch(setError);
   }, []);
@@ -151,22 +120,13 @@ export const Map: React.FC = () => {
 
   const layers = uniqBy(
     'name',
-    data[0].results
+    data.results
       .map((t) => ({
         name: t.name.split(' - ').slice(0, -1).join(' - '),
         isPreview: t.groupCategories[0] === '/Categories/Preview',
       }))
       .filter((x) => showPreview || !x.isPreview),
   );
-
-  const getLockedMessage = (x: Layer) =>
-    data[1][x.id]
-      ? `Someone else ${
-          data[1][x.id]![1] === 'done'
-            ? 'may have already uploaded'
-            : 'is working on'
-        } this dataset! Check back in one day.`
-      : '';
 
   return (
     <>
@@ -211,17 +171,17 @@ export const Map: React.FC = () => {
           <Layers />
 
           {layer &&
-            data[0].results
+            data.results
               .filter((x) => x.name.startsWith(layer))
               .filter((x) => !layersToHide.includes(x.id))
               .map((x) => (
                 <Polygon
                   key={x.id}
-                  pathOptions={getPolygon(x, data[1][x.id])}
+                  pathOptions={getPolygon(x)}
                   positions={bboxToPoly(x.extent)}
                   eventHandlers={{
                     click: () => {
-                      if (fromRapiD) returnToRapiD(x.id, data[1][x.id]);
+                      if (fromRapiD) returnToRapiD(x.id);
                       else downloadLayer(x);
                     },
                     contextmenu: () =>
@@ -234,8 +194,6 @@ export const Map: React.FC = () => {
                     <strong>{x.name}</strong>
                     <br />
                     {x.snippet}
-                    <br />
-                    {getLockedMessage(x)}
                   </Tooltip>
                 </Polygon>
               ))}

@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import TimeAgo from 'react-timeago-i18n';
+import { CDN_BASE_URL } from '../../helpers/const';
 import { ADDRESS_CATEGORIES, type AddressCategory } from './addressCategories';
 import { AddressProgressChart } from './AddressProgressChart';
-
-const CDN_BASE_URL = 'https://linz-addr-cdn.kyle.kiwi';
 
 type Data = {
   date: number;
