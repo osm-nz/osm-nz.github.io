@@ -27,7 +27,7 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
     }
   }, [loggedIn]);
 
-  const onClickLogin = useCallback(async () => {
+  const onClickLogin = useCallback(async (switchUser?: boolean) => {
     try {
       setLoading(true);
       await login({
@@ -41,13 +41,14 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
             ? 'http://127.0.0.1:3000/land.html'
             : 'https://osm-nz.github.io/land.html',
         scopes: ['read_prefs', 'write_api', 'write_notes'],
+        switchUser,
       });
 
       setLoggedIn(true);
       setLoading(false);
       setError(undefined);
     } catch (ex) {
-      setError(ex as Error);
+      if (!switchUser) setError(ex as Error);
       setLoading(false);
     }
   }, []);
@@ -57,7 +58,8 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
     setLoggedIn(false);
     setUser(undefined);
     setError(undefined);
-  }, []);
+    onClickLogin(true);
+  }, [onClickLogin]);
 
   const context = useMemo(
     () => ({ user: user!, logout: onLogout }),
@@ -71,7 +73,7 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
         <br />
         {`${error}`}
         <br />
-        <button type="button" onClick={onClickLogin}>
+        <button type="button" onClick={() => onClickLogin()}>
           Try Again
         </button>
         <button type="button" onClick={onLogout}>
@@ -88,7 +90,7 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
       <>
         You need to login to use this feature
         <br />
-        <button type="button" onClick={onClickLogin}>
+        <button type="button" onClick={() => onClickLogin()}>
           Login
         </button>
       </>

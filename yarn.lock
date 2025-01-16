@@ -2194,10 +2194,10 @@ fast-levenshtein@^2.0.6:
   resolved "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fast-xml-parser@^4.3.3:
-  version "4.3.3"
-  resolved "https://registry.npmjs.org/fast-xml-parser/-/fast-xml-parser-4.3.3.tgz"
-  integrity sha512-coV/D1MhrShMvU6D0I+VAK3umz6hUaxxhL0yp/9RjfiYUfAv14rDhGQL+PLForhMdr0wq3PiV07WtkkNjJjNHg==
+fast-xml-parser@^4.4.1:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-4.5.1.tgz#a7e665ff79b7919100a5202f23984b6150f9b31e"
+  integrity sha512-y655CeyUQ+jj7KBbYMc4FG01V8ZQqjN+gDYGJ50RtfsUB8iG9AmwmwoAgeKLJdmueKKMrH1RJ7yXHTSoczdv5w==
   dependencies:
     strnum "^1.0.5"
 
@@ -2997,13 +2997,13 @@ optionator@^0.9.3:
     prelude-ls "^1.2.1"
     type-check "^0.4.0"
 
-osm-api@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-2.1.1.tgz#19f6510e522958dac4904edf2979516795e5ac27"
-  integrity sha512-Nll8pkM5o8DPz1t/+99ViR4iycputtrjx2V/3lziKSoX9hBaybEvfZPN+bKcfSX2gWEY2dj42oiP8ZzX7JvH6A==
+osm-api@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-2.4.0.tgz#531b9fd06eb0ec4508924e3c78d3faed5ef5cf0f"
+  integrity sha512-a5OdLQx2byksELZctnxfwAzvwbZx1FskeTu12/GBlZHUziRJgF+l2x/CF8pUeX6ar4l2JCN7JRJtYBDmRbUdpg==
   dependencies:
     "@types/geojson" "^7946.0.13"
-    fast-xml-parser "^4.3.3"
+    fast-xml-parser "^4.4.1"
 
 p-limit@^2.2.0:
   version "2.3.0"

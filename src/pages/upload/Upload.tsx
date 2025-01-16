@@ -108,7 +108,6 @@ const UploadInner: React.FC = () => {
         }
         const xml = await files[0].text();
         const json = parseOsmChangeXml(xml);
-        // @ts-expect-error -- typedefs wrong
         if (json.changeset) setCsTags(tagsToStr(json.changeset));
         return setDiff(json);
       }
