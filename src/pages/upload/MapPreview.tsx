@@ -27,6 +27,7 @@ export const MapPreview: React.FC<{
   fetchCache: FetchCache | undefined;
   bboxFromOsmPatch: Bbox | undefined;
   setFocusedFeatureId(id: string | number): void;
+  removeFeatureFromPatch(id: string | number): Promise<void>;
   moveNode:
     | ((feature: OsmPatchFeature, lat: number, lng: number) => void)
     | false;
@@ -36,6 +37,7 @@ export const MapPreview: React.FC<{
   fetchCache,
   bboxFromOsmPatch,
   setFocusedFeatureId,
+  removeFeatureFromPatch,
   moveNode,
 }) => {
   const allowEdit = !!moveNode;
@@ -104,6 +106,15 @@ export const MapPreview: React.FC<{
                     click: () => setFocusedFeatureId(feature.id!),
                     dragstart: () => setFocusedFeatureId(feature.id!),
                     dragend: (event) => onDragEnd(event, feature),
+                    dblclick: async () => {
+                      if (
+                        // this is not for end users, so the UX can be a bit crude
+                        // eslint-disable-next-line no-restricted-globals, no-alert
+                        confirm('u want to remove this feature from the diff?')
+                      ) {
+                        await removeFeatureFromPatch(feature.id!);
+                      }
+                    },
                   }}
                   draggable={allowEdit && !feature.properties.__action}
                 />

@@ -89,6 +89,13 @@ const UploadInner: React.FC = () => {
     }
   }
 
+  async function removeFeatureFromPatch(id: string) {
+    await rebuildOsmChange({
+      ...osmPatch!,
+      features: osmPatch!.features.filter((feature) => feature.id !== id),
+    });
+  }
+
   async function onFileUpload(files: FileList | null) {
     if (!files?.length) {
       // the user unselected the current file, so reset
@@ -313,6 +320,7 @@ const UploadInner: React.FC = () => {
                 osmPatch={osmPatch}
                 bboxFromOsmPatch={bboxFromOsmPatch}
                 setFocusedFeatureId={setFocusedFeatureId}
+                removeFeatureFromPatch={removeFeatureFromPatch}
                 moveNode={allowEdit && moveNode}
               />
             </div>
@@ -321,6 +329,7 @@ const UploadInner: React.FC = () => {
                 <DiffForFeature
                   feature={focusedFeature}
                   original={fetchCache?.[`${focusedFeature.id}`]}
+                  removeFeatureFromPatch={removeFeatureFromPatch}
                 />
               ) : (
                 <em>Select a feature to view more details</em>

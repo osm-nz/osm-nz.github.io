@@ -15,7 +15,8 @@ const EMPTY_CELL = <td>&nbsp;</td>;
 export const DiffForFeature: React.FC<{
   feature: OsmPatchFeature;
   original: OsmFeature | undefined;
-}> = ({ feature, original }) => {
+  removeFeatureFromPatch(id: string | number): Promise<void>;
+}> = ({ feature, original, removeFeatureFromPatch }) => {
   const tag2link = useTag2link();
   const { user: me } = useContext(AuthContext);
 
@@ -42,7 +43,14 @@ export const DiffForFeature: React.FC<{
       <header style={{ textTransform: 'capitalize' }}>
         {action ? (
           <>
-            {type} {id} – <OpenInLinks type={type} id={id} />
+            {type} {id} –{' '}
+            <button
+              type="button"
+              onClick={() => removeFeatureFromPatch(feature.id!)}
+            >
+              Remove
+            </button>{' '}
+            <OpenInLinks type={type} id={id} />
           </>
         ) : (
           <>🆕 {feature.id}</>
