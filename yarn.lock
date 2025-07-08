@@ -2997,10 +2997,10 @@ optionator@^0.9.3:
     prelude-ls "^1.2.1"
     type-check "^0.4.0"
 
-osm-api@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-2.7.0.tgz#63bb16ac493f265f0c97ce6f5e9f826b788db7b5"
-  integrity sha512-mV3r7xB+TQo8mGfCuSOpAL7gGSfFa1neh2Arz7RorpT9IGX5AoLV9sLrT62Gix/Iv9EADbZrs9+TZlCxRz+dEA==
+osm-api@^3.0.0-beta:
+  version "3.0.0-beta"
+  resolved "https://registry.yarnpkg.com/osm-api/-/osm-api-3.0.0-beta.tgz#589bce5cdd409ca51784129321b5dab4a9e4ae00"
+  integrity sha512-jyrPtWyi32fPSDvQqHaERTXIQUzMK/6HjXqLbRC7hiP9ypdvVYtonSwCVLW/U81+Ikgg207STBvDdMUy0+KrZw==
   dependencies:
     "@types/geojson" "^7946.0.13"
     fast-xml-parser "^4.4.1"
