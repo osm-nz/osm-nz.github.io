@@ -1,0 +1,33 @@
+.LinzLink {
+  display: flex;
+  & > div {
+    &:first-child {
+      /* left side */
+      overflow-y: auto;
+    }
+    width: 50vw;
+    height: 100vh;
+    & > a {
+      margin-top: 4px;
+      text-align: center;
+      display: block;
+      & > button {
+        font-size: larger;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  .LinzLink {
+    flex-direction: column;
+    & > div {
+      width: 100%;
+      height: fit-content;
+      &:last-child {
+        /* left side */
+        height: 50vh;
+      }
+    }
+  }
+}

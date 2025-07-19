@@ -41,6 +41,7 @@ jobs:
           yarn build
         env:
           CI: true
+          VITE_LDS_KEY: ${{ secrets.VITE_LDS_KEY }}
 
       - name: Deploy Client ⚛
         if: ${{ github.ref == 'refs/heads/main' }}

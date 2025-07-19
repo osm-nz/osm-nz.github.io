@@ -4,9 +4,11 @@ import {
   AddressImportHome,
   HistoryRestorer,
   Home,
+  LinzLink,
   Map,
   Upload,
   WrappedWhatsup,
+  layerKey,
 } from './pages';
 
 import './index.css';
@@ -22,6 +24,9 @@ const App: React.FC = () => {
     window.addEventListener('popstate', onNavigate);
     return () => window.removeEventListener('popstate', onNavigate);
   }, []);
+
+  // has priority over the URL hash
+  if (layerKey) return <LinzLink />;
 
   if (path === '/whatsup') return <WrappedWhatsup />;
   if (path === '/upload') return <Upload />;
