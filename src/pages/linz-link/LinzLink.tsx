@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { GeoJSON, MapContainer } from 'react-leaflet';
-import type { LatLng, GeoJSON as LeafletGeoJSON, Map } from 'leaflet';
+import {
+  type LatLng,
+  type GeoJSON as LeafletGeoJSON,
+  type Map,
+  marker,
+} from 'leaflet';
 import type { GeoJsonObject } from 'geojson';
 import { Layers } from '../map/Layers';
+import { ICONS } from '../map/icons';
 import classes from './LinzLink.module.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -191,6 +197,10 @@ export const LinzLink: React.FC = () => {
         <GeoJSON
           data={data.items[0].__geometry__ as GeoJsonObject}
           ref={(f) => f && onMapLoad({ feature: f })}
+          // leaflet's default icon isn't bundled by vite in production
+          pointToLayer={(_, location) =>
+            marker(location, { icon: ICONS.green })
+          }
         />
       </MapContainer>
     </main>
