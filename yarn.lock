@@ -902,6 +902,11 @@
   resolved "https://registry.npmjs.org/@types/geojson/-/geojson-7946.0.13.tgz"
   integrity sha512-bmrNrgKMOhM3WsafmbGmC+6dsF2Z308vLFsQ3a/bT8X8Sv5clVYpPars/UPq+sAaJP+5OoLAYgwbkS5QEJdLUQ==
 
+"@types/geojson@^7946.0.16":
+  version "7946.0.16"
+  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.16.tgz#8ebe53d69efada7044454e3305c19017d97ced2a"
+  integrity sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==
+
 "@types/leaflet@^1.9.3":
   version "1.9.3"
   resolved "https://registry.npmjs.org/@types/leaflet/-/leaflet-1.9.3.tgz"
@@ -3004,6 +3009,13 @@ osm-api@^3.0.0-beta:
   dependencies:
     "@types/geojson" "^7946.0.13"
     fast-xml-parser "^4.4.1"
+
+osm2geojson-lite@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/osm2geojson-lite/-/osm2geojson-lite-1.2.0.tgz#bc2ab8c2491c3da7ce8c0e36234d488134376f1e"
+  integrity sha512-NheOlfQqtCqTshSTRc5e0XX6sgEca7/iIDng4tF649vcMiCJMUi0lqRzHWVQWGrkPh52Z4rDax8NqaXngdo96A==
+  optionalDependencies:
+    "@types/geojson" "^7946.0.16"
 
 p-limit@^2.2.0:
   version "2.3.0"

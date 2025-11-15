@@ -30,4 +30,9 @@ export const ICONS = {
       'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
     ...boilerplate,
   }),
+  blue: new Icon({
+    iconUrl:
+      'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+    ...boilerplate,
+  }),
 };

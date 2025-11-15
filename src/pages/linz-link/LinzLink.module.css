@@ -7,13 +7,10 @@
     }
     width: 50vw;
     height: 100vh;
-    & > a {
-      margin-top: 4px;
-      text-align: center;
-      display: block;
-      & > button {
-        font-size: larger;
-      }
+    text-align: center;
+    & button {
+      margin: 4px;
+      font-size: larger;
     }
   }
 }

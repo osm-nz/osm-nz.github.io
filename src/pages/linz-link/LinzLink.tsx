@@ -6,7 +6,9 @@ import {
   type Map,
   marker,
 } from 'leaflet';
-import type { GeoJsonObject } from 'geojson';
+import type { FeatureCollection, GeoJsonObject } from 'geojson';
+import osm2geojson from 'osm2geojson-lite';
+import type { OsmFeature } from 'osm-api';
 import { Layers } from '../map/Layers';
 import { ICONS } from '../map/icons';
 import classes from './LinzLink.module.css';
@@ -50,6 +52,37 @@ async function query(key: LayerKey, value: string) {
   return response;
 }
 
+async function queryOsm(_key: LayerKey, value: string) {
+  const key = `ref:linz:${_key}`;
+  // overpass takes ages and might timeout, so check taginfo first
+  // to see if this key even exists in the DB.
+  const taginfo: { data: { count: number }[] } = await fetch(
+    `https://taginfo.openstreetmap.org/api/4/tag/stats?key=${key}&value=${value}`,
+  ).then((r) => r.json());
+
+  const hasData = taginfo.data.some((item) => item.count);
+  if (!hasData) return null;
+
+  // if there is data, now we can query OSM
+  const overpasSql = `
+    [out:json][timeout:60];
+    nwr["${key}"="${value}"];
+    out meta geom;
+  `;
+  const overpassResp = (await fetch('https://overpass-api.de/api/interpreter', {
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    },
+    body: new URLSearchParams({
+      data: overpasSql,
+    }).toString(),
+    method: 'POST',
+  }).then((r) => r.json())) as { elements: OsmFeature[] };
+
+  const geojson = osm2geojson(overpassResp);
+  return geojson;
+}
+
 function datasetLink(lat: number, lon: number, zoom: number, layer: number) {
   const qs = new URLSearchParams({
     'mv.basemap': 'Streets',
@@ -80,10 +113,13 @@ const urlQs = new URLSearchParams(window.location.search);
 export const layerKey = [...urlQs.keys()].find(isLayerKey);
 const layerValue = layerKey && urlQs.get(layerKey);
 const promise = layerKey && query(layerKey, layerValue!);
+const promiseOsm = layerKey && queryOsm(layerKey, layerValue!);
 
 export const LinzLink: React.FC = () => {
   const [data, setData] = useState<QueryResponse>();
   const [error, setError] = useState<Error>();
+  const [osmData, setOsmData] = useState<FeatureCollection | null>();
+  const [enableOsm, setEnableOsm] = useState(false);
 
   const [centre, setCentre] = useState<LatLng>();
   const map = useRef<Map>();
@@ -104,6 +140,7 @@ export const LinzLink: React.FC = () => {
   useEffect(() => {
     document.title = `${layerKey} · ${layerValue}`;
     promise?.then(setData).catch(setError);
+    promiseOsm?.then(setOsmData).catch(console.error); // ignore errors
   }, []);
 
   if (!promise || !layerKey) {
@@ -137,6 +174,15 @@ export const LinzLink: React.FC = () => {
           >
             <button type="button">Go To LINZ Data Service</button>
           </a>
+        )}
+        {osmData !== undefined && (
+          <button
+            type="button"
+            onClick={() => setEnableOsm((c) => !c)}
+            disabled={osmData === null}
+          >
+            {enableOsm ? 'Hide OSM feature' : 'Compare with OSM'}
+          </button>
         )}
         <table>
           <thead>
@@ -198,10 +244,30 @@ export const LinzLink: React.FC = () => {
           data={data.items[0].__geometry__ as GeoJsonObject}
           ref={(f) => f && onMapLoad({ feature: f })}
           // leaflet's default icon isn't bundled by vite in production
-          pointToLayer={(_, location) =>
-            marker(location, { icon: ICONS.green })
-          }
+          pointToLayer={(_, location) => marker(location, { icon: ICONS.blue })}
         />
+        {osmData && enableOsm && (
+          <>
+            <GeoJSON
+              data={osmData}
+              style={{ color: '#f00' }}
+              // leaflet's default icon isn't bundled by vite in production
+              pointToLayer={(_, location) =>
+                marker(location, { icon: ICONS.red })
+              }
+            />
+            <div
+              className="legend leaflet-bottom leaflet-left"
+              style={{ margin: 20 }}
+            >
+              <i style={{ background: '#1e90ff' }} />
+              LINZ
+              <br />
+              <i style={{ background: '#f00' }} />
+              OSM
+            </div>
+          </>
+        )}
       </MapContainer>
     </main>
   );
