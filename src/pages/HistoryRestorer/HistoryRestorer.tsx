@@ -5,7 +5,8 @@ import { save, validate } from './api';
 import type { Item, NWR, ValidationResult } from './util';
 import classes from './HistoryRestorer.module.css';
 
-const NEW_FEATURE = (): Item => ({ type: 'n' });
+let lastFeatureType: NWR = 'n';
+const NEW_FEATURE = (): Item => ({ type: lastFeatureType });
 
 const SelectNWR: React.FC<{ value: NWR; onChange(newValue: NWR): void }> = ({
   value,
@@ -15,7 +16,10 @@ const SelectNWR: React.FC<{ value: NWR; onChange(newValue: NWR): void }> = ({
     <select
       className={classes.smallInput}
       value={value}
-      onChange={(event) => onChange(event.target.value as NWR)}
+      onChange={(event) => {
+        lastFeatureType = event.target.value as NWR;
+        onChange(lastFeatureType);
+      }}
     >
       <option value="n">Node</option>
       <option value="w">Way</option>
