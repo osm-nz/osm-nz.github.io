@@ -12,6 +12,24 @@ export async function validate(items: Item[]): Promise<ValidationResult[]> {
   if (items.some((item) => !item.fromId || !item.toId)) {
     throw new Error('Some fields are blank');
   }
+  const fromIdSet = new Set();
+  for (const item of items) {
+    if (fromIdSet.has(item.fromId)) {
+      throw new Error(
+        `${MAP[item.type]} ${item.fromId} in Deleted Features is duplicated`,
+      );
+    }
+    fromIdSet.add(item.fromId);
+  }
+  const toIdSet = new Set();
+  for (const item of items) {
+    if (toIdSet.has(item.toId)) {
+      throw new Error(
+        `${MAP[item.type]} ${item.toId} in New Features is duplicated`,
+      );
+    }
+    toIdSet.add(item.toId);
+  }
 
   const toFetch: Record<LongNWR, (string | number)[]> = {
     node: items.filter((item) => item.type === 'n').map((item) => item.toId!),
