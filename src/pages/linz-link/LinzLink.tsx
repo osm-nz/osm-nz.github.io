@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { GeoJSON, MapContainer } from 'react-leaflet';
 import {
   type LatLng,
@@ -143,6 +143,25 @@ export const LinzLink: React.FC = () => {
     promiseOsm?.then(setOsmData).catch(console.error); // ignore errors
   }, []);
 
+  const blobUrl = useMemo(() => {
+    if (!data) return undefined;
+    const { __geometry__, ...properties } = data.items[0];
+    const geojson: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: __geometry__ as never,
+          properties,
+        },
+      ],
+    };
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], {
+      type: 'application/json',
+    });
+    return URL.createObjectURL(blob);
+  }, [data]);
+
   if (!promise || !layerKey) {
     return `URL does not contain any a valid key, the options are: ${Object.keys(LAYERS).join(', ')}`;
   }
@@ -231,6 +250,13 @@ export const LinzLink: React.FC = () => {
               ))}
           </tbody>
         </table>
+        {blobUrl && (
+          <small>
+            <a href={blobUrl} download={`${layerKey}-${layerValue}.geo.json`}>
+              Download as GeoJSON
+            </a>
+          </small>
+        )}
       </div>
       <MapContainer
         style={{ width: '100%', height: '100vh' }}
