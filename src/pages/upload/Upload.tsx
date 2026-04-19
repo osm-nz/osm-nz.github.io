@@ -258,7 +258,7 @@ const UploadInner: React.FC = () => {
       <br />
       <input
         type="file"
-        accept=".osc,.osmPatch.geo.json"
+        accept=".osc,.osmPatch.geo.json,.json"
         multiple
         onChange={(event) => onFileUpload(event.target.files)}
         ref={input}
