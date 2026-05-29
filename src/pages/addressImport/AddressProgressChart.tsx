@@ -1,75 +1,47 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Line, type Serie } from '@nivo/line';
-import { ADDRESS_CATEGORIES, type AddressCategory } from './addressCategories';
-
-type MarkdownTableRow = {
-  [K in AddressCategory]: string;
-} & {
-  Sync_Date: string;
-  Total: string;
-  Comment: string;
-};
-
-function parseMarkdownTable(markdown: string) {
-  const rows = markdown.replaceAll('\r', '').split('---')[1].trim().split('\n');
-
-  const headers = rows[0]
-    .split('|')
-    .map((header) => header.replaceAll(' ', '_'));
-
-  const table = rows
-    .slice(2) // skip header and dividor row
-    .map(
-      (row) =>
-        Object.fromEntries(
-          row.split('|').map((cell, index) => [headers[index], cell]),
-        ) as MarkdownTableRow,
-    );
-  return table;
-}
+import { CDN_BASE_URL } from '../../helpers/const';
+import { ADDRESS_CATEGORIES } from './addressCategories';
+import type { HistoryFile } from './AddressImportHome';
 
 export const AddressProgressChart: React.FC = () => {
-  const [markdown, setMarkdown] = useState<string>();
+  const [history, setHistory] = useState<HistoryFile>();
   const [min, setMin] = useState(90);
 
   useEffect(() => {
-    fetch('https://api.github.com/repos/osm-nz/linz-address-import/issues/1')
+    fetch(`${CDN_BASE_URL}/stats-history.json`)
       .then((r) => r.json())
-      .then((issue) => setMarkdown(issue.body));
+      .then(setHistory);
   }, []);
 
   const chartData = useMemo((): Serie[] => {
-    if (!markdown) return [];
-
-    const table = parseMarkdownTable(markdown);
+    if (!history) return [];
 
     const series = Object.entries(ADDRESS_CATEGORIES)
       // .filter((cat) => cat !== 'PERFECT' && cat !== 'TOTALLY_MISSING')
-      .map(([_addressCategory, categoryInfo]): Serie => {
-        const addressCategory = _addressCategory as AddressCategory; // TS is dumb
-        const colour = categoryInfo[3];
+      .map(([addressCategory, categoryInfo]): Serie => {
+        // eslint-disable-next-line unicorn/no-unreadable-array-destructuring
+        const [catNumber, , , colour] = categoryInfo;
 
         return {
           id: addressCategory,
           color: colour,
-          data: table
-            .filter(
-              (row, index) => row.Sync_Date !== table[index - 1]?.Sync_Date,
-            )
+          data: history.rows
+            .filter((row, index, array) => row.date !== array[index - 1]?.date)
             .map((row) => {
               const percent = +(
                 100 *
-                (+row[addressCategory] / +row.Total)
+                (+row.count[catNumber] / +row.total)
               ).toFixed(2);
               return {
-                x: row.Sync_Date,
+                x: row.date.split('T')[0],
                 y: Number.isNaN(percent) ? 0 : percent,
               };
             }),
         };
       });
     return series;
-  }, [markdown]);
+  }, [history]);
 
   if (!chartData.length) return <>Loading…</>;
 

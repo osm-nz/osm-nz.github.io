@@ -4,15 +4,21 @@ import { CDN_BASE_URL } from '../../helpers/const';
 import { ADDRESS_CATEGORIES, type AddressCategory } from './addressCategories';
 import { AddressProgressChart } from './AddressProgressChart';
 
-type Data = {
-  date: number;
+export interface StatsFile {
+  /** ISO Date */
+  date: string;
   count: Record<AddressCategory, number>;
   total: number;
-};
+}
+export interface HistoryFile {
+  /** ISO Date */
+  lastUpdated: string;
+  rows: StatsFile[];
+}
 
 export const AddressImportHome: React.FC = () => {
   const [error, setError] = useState<Error>();
-  const [data, setData] = useState<Data>();
+  const [data, setData] = useState<StatsFile>();
 
   useEffect(() => {
     fetch(`${CDN_BASE_URL}/stats.json`)
@@ -44,8 +50,11 @@ export const AddressImportHome: React.FC = () => {
         </thead>
         <tbody>
           {Object.entries(data.count).map(([status, count]) => {
-            const [n, category, howToAction, backgroundColor, rawFile] =
-              ADDRESS_CATEGORIES[status as AddressCategory];
+            const row = Object.values(ADDRESS_CATEGORIES).find(
+              (v) => v[0] === +status,
+            );
+            if (!row) return null;
+            const [n, category, howToAction, backgroundColor, rawFile] = row;
             return (
               <tr key={status}>
                 <td style={{ backgroundColor }}>{n}</td>

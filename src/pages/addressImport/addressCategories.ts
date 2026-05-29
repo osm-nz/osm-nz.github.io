@@ -90,8 +90,8 @@ export const ADDRESS_CATEGORIES = {
     '#fada5e',
     'replaced-by-building.txt',
   ],
-} satisfies {
-  [statusCode: string]: [
+} as const satisfies {
+  [statusCode: string]: readonly [
     statusCodeNumber: number,
     description: string,
     actionDescription: string,
@@ -100,4 +100,5 @@ export const ADDRESS_CATEGORIES = {
   ];
 };
 
-export type AddressCategory = keyof typeof ADDRESS_CATEGORIES;
+export type AddressCategory =
+  (typeof ADDRESS_CATEGORIES)[keyof typeof ADDRESS_CATEGORIES][0];
