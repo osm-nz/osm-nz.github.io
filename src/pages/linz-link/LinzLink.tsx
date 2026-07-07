@@ -16,7 +16,7 @@ import 'leaflet/dist/leaflet.css';
 
 /** map of the OSM key to the LINZ layer ID and primary key */
 const LAYERS = {
-  address_id: [105689, 'address_id'],
+  address_id: [123113, 'address_id'],
   building_id: [101290, 'building_id'],
   // place_id: already hanlded by the NZGB
   // topo50_id: can't link, refers to multiple layers and sometimes it's our own constructed value
