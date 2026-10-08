@@ -1,4 +1,4 @@
-import { use, useRef, useState } from 'react';
+import { use, useEffect, useEffectEvent, useRef, useState } from 'react';
 import {
   type OsmChange,
   createOsmChangeXml,
@@ -26,6 +26,12 @@ const DEFAULT_TAGS = {
   source: 'https://wiki.osm.org/LINZ',
   comment: '',
 };
+
+/** these domains can use postMessage to load osmPatch or osmChange files into the editor */
+const TRUSTED_ORIGINS = new Set([
+  window.location.origin,
+  'http://127.0.0.1:4884',
+]);
 
 function parseCsTags(str: string): Record<string, string> | undefined {
   try {
@@ -96,7 +102,7 @@ const UploadInner: React.FC = () => {
     });
   }
 
-  async function onFileUpload(files: FileList | null) {
+  async function onFileUpload(files: FileList | File[] | null) {
     if (!files?.length) {
       // the user unselected the current file, so reset
       setMessages([]); // reset messages
@@ -170,6 +176,39 @@ const UploadInner: React.FC = () => {
       return setError(ex instanceof Error ? ex : new Error(`${ex}`));
     }
   }
+
+  const onFileUpload_effect = useEffectEvent(onFileUpload);
+  useEffect(() => {
+    const opener = window.opener as WindowProxy;
+    if (!opener) return () => undefined;
+
+    function onMessage(event: MessageEvent) {
+      if (event.source !== opener) return;
+      if (!TRUSTED_ORIGINS.has(event.origin)) return;
+
+      const data: unknown = event.data;
+      if (
+        typeof data !== 'object' ||
+        !data ||
+        !('files' in data) ||
+        !Array.isArray(data.files)
+      ) {
+        return;
+      }
+
+      opener.postMessage('received', event.origin);
+      const files = data.files.filter((b): b is File => b instanceof File);
+      onFileUpload_effect(files);
+    }
+    window.addEventListener('message', onMessage);
+
+    // reply to all possible origins, because we don't know
+    // which origin sent the message...
+    for (const origin of TRUSTED_ORIGINS) {
+      opener.postMessage('ready', origin);
+    }
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
 
   async function upload() {
     setResult(undefined);
