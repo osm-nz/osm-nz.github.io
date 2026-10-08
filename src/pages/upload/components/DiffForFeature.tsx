@@ -6,6 +6,7 @@ import { MAP } from '../../HistoryRestorer/util';
 import { AuthContext } from '../../../wrappers';
 import classes from '../Upload.module.css';
 import { useTag2link } from '../../../hooks/useTag2link';
+import { cleanTags } from '../util';
 import { OpenInLinks } from './OpenInLinks';
 import { LatLngDiff } from './LatLngDiff';
 import { MaybeLink } from './MaybeLink';
@@ -23,10 +24,8 @@ export const DiffForFeature: React.FC<{
   const type = MAP[`${feature.id}`[0] as keyof typeof MAP];
   const id = +`${feature.id}`.slice(1);
 
-  const [action, , tagDiff] = useMemo(() => {
-    const { __action, __members, ...newTags } = feature.properties;
-    return [__action, __members, newTags];
-  }, [feature]);
+  const action = feature.properties.__action;
+  const tagDiff = useMemo(() => cleanTags(feature.properties), [feature]);
 
   const allKeys = useMemo(() => {
     const keys = new Set([
@@ -135,7 +134,7 @@ export const DiffForFeature: React.FC<{
             let newValue =
               feature.properties.__action === 'delete'
                 ? ''
-                : feature.properties[key] || originalValue;
+                : tagDiff[key] || originalValue;
             if (newValue === '🗑️') newValue = '';
 
             if (!originalValue && !newValue) {

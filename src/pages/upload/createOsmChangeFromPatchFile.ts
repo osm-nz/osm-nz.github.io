@@ -10,7 +10,7 @@ import type {
 } from 'osm-api';
 import { MAP, type NWR } from '../HistoryRestorer/util';
 import type { OsmPatch } from '../../types';
-import { type FetchCache, fetchChunked } from './util';
+import { type FetchCache, cleanTags, fetchChunked } from './util';
 import { type Bbox, getGeoJsonBbox } from './helpers/bbox';
 
 // eslint-disable-next-line unicorn/prefer-structured-clone
@@ -257,7 +257,8 @@ export async function createOsmChangeFromPatchFile(
   const fetched = await fetchChunked(toFetch, existingCache);
 
   for (const f of osmPatch.features) {
-    const { __action, __members: relationMembers, ...tags } = f.properties;
+    const { __action, __members: relationMembers } = f.properties;
+    const tags = cleanTags(f.properties);
     switch (__action) {
       case 'edit': {
         const edited = updateTags(fetched[f.id!], tags);

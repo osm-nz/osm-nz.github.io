@@ -1,4 +1,14 @@
 import { type OsmFeature, type OsmFeatureType, getFeatures } from 'osm-api';
+import type { Tags } from '../../types';
+
+export function cleanTags(old: Tags): Tags {
+  const cleaned: Tags = {};
+  for (const key in old) {
+    if (key.startsWith('__')) continue;
+    cleaned[key] = old[key];
+  }
+  return cleaned;
+}
 
 export function* chunk<T>(array: T[], limit: number): Generator<T[], void> {
   for (let index = 0; index < array.length; index += limit) {
