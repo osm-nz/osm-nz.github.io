@@ -29,8 +29,7 @@ export const MapPreview: React.FC<{
   setFocusedFeatureId(id: string | number): void;
   removeFeatureFromPatch(id: string | number): Promise<void>;
   moveNode:
-    | ((feature: OsmPatchFeature, lat: number, lng: number) => void)
-    | false;
+    ((feature: OsmPatchFeature, lat: number, lng: number) => void) | false;
 }> = ({
   diff,
   osmPatch,
@@ -41,7 +40,7 @@ export const MapPreview: React.FC<{
   moveNode,
 }) => {
   const allowEdit = !!moveNode;
-  const polygonGroup = useRef<IFeatureGroup>(null);
+  const polygonGroupRef = useRef<IFeatureGroup>(null);
 
   const bbox = useMemo(
     () => getCsBbox(diff, fetchCache, bboxFromOsmPatch),
@@ -74,7 +73,7 @@ export const MapPreview: React.FC<{
     >
       <Layers />
 
-      <FeatureGroup ref={polygonGroup}>
+      <FeatureGroup ref={polygonGroupRef}>
         <Polygon
           positions={[
             [bbox.maxLat, bbox.minLng], // NW

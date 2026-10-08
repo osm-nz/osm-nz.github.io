@@ -23,7 +23,7 @@ export async function fetchChunked(
     );
 
     for (const ids of chunk(unchunked, 100)) {
-      console.log(`Fetching ${ids.length} ${type}s...`);
+      console.info(`Fetching ${ids.length} ${type}s...`);
       const features = await getFeatures(type, ids);
       for (const feature of features) {
         const nwrId = feature.type[0] + feature.id;

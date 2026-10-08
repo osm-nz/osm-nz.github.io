@@ -2,7 +2,7 @@ import type { OsmNode, OsmRelation, OsmWay } from 'osm-api';
 import type { FetchCache } from '../../util';
 import { recurseToNodes } from '../recurseToNodes';
 
-describe('recurseToNodes', () => {
+describe(recurseToNodes, () => {
   it('recurses thru way/relation dependencies to find all nodes', () => {
     const fetchCache: FetchCache = {
       n1: <OsmNode>{ type: 'node', id: 1 },

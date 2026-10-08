@@ -1,7 +1,7 @@
 import {
   Fragment,
   createContext,
-  useContext,
+  use,
   useEffect,
   useMemo,
   useState,
@@ -114,7 +114,7 @@ const RenderValue: React.FC<{
   ids: OsmId[];
 }> = ({ value, className, ids }) => {
   const [index, setIndex] = useState(0);
-  const setFocusedFeatureId = useContext(TagChangeContext);
+  const setFocusedFeatureId = use(TagChangeContext);
 
   const props = useMemo(() => {
     return {
@@ -242,7 +242,7 @@ export const TagChanges: React.FC<{
   }
 
   return (
-    <TagChangeContext.Provider value={setFocusedFeatureId}>
+    <TagChangeContext value={setFocusedFeatureId}>
       <ul className={classes.tagChanges}>
         {renderSimpleSection(changes.added, classes.added, 'Added')}
         {renderSimpleSection(changes.changed, classes.changedOld, 'Changed')}
@@ -253,6 +253,6 @@ export const TagChanges: React.FC<{
           'Deleted',
         )}
       </ul>
-    </TagChangeContext.Provider>
+    </TagChangeContext>
   );
 };

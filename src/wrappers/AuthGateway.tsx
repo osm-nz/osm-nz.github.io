@@ -18,7 +18,7 @@ AuthContext.displayName = 'AuthContext';
 export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(isLoggedIn());
+  const [loggedIn, setLoggedIn] = useState(isLoggedIn);
   const [user, setUser] = useState<OsmOwnUser>();
 
   useEffect(() => {
@@ -99,7 +99,5 @@ export const AuthGateway: React.FC<PropsWithChildren> = ({ children }) => {
 
   if (!user) return <>Loading...</>;
 
-  return (
-    <AuthContext.Provider value={context}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext value={context}>{children}</AuthContext>;
 };

@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@nivo/line": "^0.83.0",
     "@rapideditor/country-coder": "^5.2.1",
     "clsx": "^2.0.0",
     "diff": "^5.1.0",
@@ -12,24 +11,24 @@
     "leaflet": "^1.9.4",
     "osm-api": "^3.0.0-beta",
     "osm2geojson-lite": "^1.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-leaflet": "^4.2.1",
-    "react-timeago-i18n": "^1.1.0"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-leaflet": "^5.0.0",
+    "react-timeago-i18n": "^2.4.0"
   },
   "devDependencies": {
     "@types/diff": "^5.0.3",
     "@types/geojson": "^7946.0.10",
     "@types/leaflet": "^1.9.3",
     "@types/node": "^20.4.8",
-    "@types/react": "^18.2.18",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.0.4",
-    "eslint": "^9.9.0",
-    "eslint-config-kyle": "^25.0.0-beta2",
-    "typescript": "^5.1.6",
-    "vite": "^4.4.8",
-    "vitest": "^0.34.6"
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "eslint": "^10.12.0",
+    "eslint-config-kyle": "^29.0.1",
+    "typescript": "6",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "lint": "eslint . && tsc",

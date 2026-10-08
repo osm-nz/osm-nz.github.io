@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { use, useState } from 'react';
 import { getConfig } from 'osm-api';
 import { AuthContext, AuthGateway } from '../../wrappers';
 import { save, validate } from './api';
@@ -29,9 +29,9 @@ const SelectNWR: React.FC<{ value: NWR; onChange(newValue: NWR): void }> = ({
 };
 
 const HistoryRestorerInner: React.FC = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = use(AuthContext);
 
-  const [items, setItems] = useState<Item[]>([NEW_FEATURE()]);
+  const [items, setItems] = useState<Item[]>(() => [NEW_FEATURE()]);
   const [reload, setReload] = useState(0);
   const [validationResults, setValidationResults] =
     useState<ValidationResult[]>();
@@ -130,7 +130,7 @@ const HistoryRestorerInner: React.FC = () => {
         {items.map((item, index) => {
           const v = validationResults?.[index];
           return (
-            // eslint-disable-next-line react/no-array-index-key -- `reload` makes this safe
+            // eslint-disable-next-line @eslint-react/no-array-index-key -- `reload` makes this safe
             <div className={classes.item} key={reload + index}>
               <div>
                 <SelectNWR
@@ -226,6 +226,7 @@ const HistoryRestorerInner: React.FC = () => {
       <br />
       <br />
       Logged in as <code>{user.display_name}</code>.{' '}
+      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/no-static-element-interactions */}
       <a onClick={logout}>Logout</a>
     </div>
   );

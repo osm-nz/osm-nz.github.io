@@ -3,6 +3,7 @@ build
 .DS_Store
 *.log*
 *.local*
+*.tsbuildinfo
 
 # we use yarn
 package-lock.json

@@ -122,18 +122,18 @@ export const LinzLink: React.FC = () => {
   const [enableOsm, setEnableOsm] = useState(false);
 
   const [centre, setCentre] = useState<LatLng>();
-  const map = useRef<Map>();
-  const feature = useRef<LeafletGeoJSON>();
+  const mapRef = useRef<Map>(undefined);
+  const featureRef = useRef<LeafletGeoJSON>(undefined);
 
   function onMapLoad(ref: { map: Map } | { feature: LeafletGeoJSON }) {
     // these two might fire onLoad at different times, so wait for both to be ready
-    if ('map' in ref) map.current = ref.map;
-    if ('feature' in ref) feature.current = ref.feature;
+    if ('map' in ref) mapRef.current = ref.map;
+    if ('feature' in ref) featureRef.current = ref.feature;
 
-    if (map.current && feature.current && !centre) {
+    if (mapRef.current && featureRef.current && !centre) {
       // both are ready
-      setCentre(feature.current.getBounds().getCenter());
-      map.current.fitBounds(feature.current.getBounds());
+      setCentre(featureRef.current.getBounds().getCenter());
+      mapRef.current.fitBounds(featureRef.current.getBounds());
     }
   }
 
@@ -185,7 +185,8 @@ export const LinzLink: React.FC = () => {
             href={datasetLink(
               centre.lat,
               centre.lng,
-              map.current?.getZoom() || defaultZoom,
+              // eslint-disable-next-line react-hooks/refs
+              mapRef.current?.getZoom() || defaultZoom,
               LAYERS[layerKey][0],
             )}
             target="_blank"
@@ -228,7 +229,7 @@ export const LinzLink: React.FC = () => {
                       k
                     )}
                   </td>
-                  <td>{}</td>
+                  <td>{''}</td>
                   <td>
                     {v === null ? (
                       ''
@@ -263,12 +264,16 @@ export const LinzLink: React.FC = () => {
         scrollWheelZoom
         zoom={defaultZoom}
         center={[0, 0]}
-        ref={(m) => m && onMapLoad({ map: m })}
+        ref={(m) => {
+          if (m) onMapLoad({ map: m });
+        }}
       >
         <Layers />
         <GeoJSON
           data={data.items[0].__geometry__ as GeoJsonObject}
-          ref={(f) => f && onMapLoad({ feature: f })}
+          ref={(f) => {
+            if (f) onMapLoad({ feature: f });
+          }}
           // leaflet's default icon isn't bundled by vite in production
           pointToLayer={(_, location) => marker(location, { icon: ICONS.blue })}
         />

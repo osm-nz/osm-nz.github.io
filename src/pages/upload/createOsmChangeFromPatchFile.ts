@@ -27,17 +27,16 @@ const TEMPLATE_OSM_FEATURE: Omit<OsmFeature, 'id' | 'type'> = {
 
 const DEPRECATED_TAGS: Record<string, true | Record<string, true>> = {
   source_ref: {
+    /* eslint-disable unicorn/prefer-https */
     'http://www.nzopengps.org/': true,
     'http://www.linz.govt.nz/topography/topo-maps/': true,
     'http://www.linz.govt.nz/topography/topo-maps/index.aspx': true,
-    'http://www.linz.govt.nz/about-linz/linz-data-service/dataset-information':
-      true,
+    'http://www.linz.govt.nz/about-linz/linz-data-service/dataset-information': true,
   },
   attribution: {
     'http://wiki.osm.org/wiki/Attribution#LINZ': true,
     'http://wiki.openstreetmap.org/wiki/Attribution#LINZ': true,
-    'http://www.aucklandcouncil.govt.nz/EN/ratesbuildingproperty/propertyinformation/GIS_maps/Pages/opendata.aspx':
-      true,
+    'http://www.aucklandcouncil.govt.nz/EN/ratesbuildingproperty/propertyinformation/GIS_maps/Pages/opendata.aspx': true,
   },
   'linz2osm:objectid': true,
   'LINZ2OSM:dataset': true,

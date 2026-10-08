@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react';
+import { use, useMemo } from 'react';
 import TimeAgo from 'react-timeago-i18n';
 import type { OsmFeature } from 'osm-api';
 import type { OsmPatchFeature } from '../../../types';
@@ -18,7 +18,7 @@ export const DiffForFeature: React.FC<{
   removeFeatureFromPatch(id: string | number): Promise<void>;
 }> = ({ feature, original, removeFeatureFromPatch }) => {
   const tag2link = useTag2link();
-  const { user: me } = useContext(AuthContext);
+  const { user: me } = use(AuthContext);
 
   const type = MAP[`${feature.id}`[0] as keyof typeof MAP];
   const id = +`${feature.id}`.slice(1);
@@ -35,7 +35,7 @@ export const DiffForFeature: React.FC<{
     ]);
 
     // sort alphabetically
-    return [...keys].sort((a, b) => a.localeCompare(b));
+    return [...keys].toSorted((a, b) => a.localeCompare(b));
   }, [tagDiff, original]);
 
   return (
@@ -173,6 +173,7 @@ export const DiffForFeature: React.FC<{
         </tbody>
       </table>
       {type === 'relation' && (
+        // eslint-disable-next-line @eslint-react/jsx-no-useless-fragment
         <>
           <header>Members</header>
           {/* TODO: move relation member stuff here */}

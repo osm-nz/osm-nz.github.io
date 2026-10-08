@@ -24,7 +24,7 @@ async function getTag2Link() {
     // find an item with the best rank
     const bestDefinition = array
       .filter((item) => item.key === key)
-      .sort((a, b) => RANKS.indexOf(b.rank) - RANKS.indexOf(a.rank))[0];
+      .toSorted((a, b) => RANKS.indexOf(b.rank) - RANKS.indexOf(a.rank))[0];
 
     map.set(key.replace('Key:', ''), bestDefinition.url);
   }

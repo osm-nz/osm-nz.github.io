@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import { use, useRef, useState } from 'react';
 import {
   type OsmChange,
   createOsmChangeXml,
@@ -50,12 +50,12 @@ const tagsToStr = (tags: Record<string, string>): string =>
     .join('\n');
 
 const UploadInner: React.FC = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = use(AuthContext);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [result, setResult] = useState<number>();
-  const [csTags, setCsTags] = useState(tagsToStr(DEFAULT_TAGS));
+  const [csTags, setCsTags] = useState(() => tagsToStr(DEFAULT_TAGS));
   const [diff, setDiff] = useState<OsmChange>();
   const [fetchCache, setFetchCache] = useState<FetchCache>();
   const [fileName, setFileName] = useState<string>();
@@ -65,7 +65,7 @@ const UploadInner: React.FC = () => {
   const [focusedFeatureId, setFocusedFeatureId] = useState<string | number>();
   const [allowEdit, setAllowEdit] = useState(false);
 
-  const input = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const focusedFeature = osmPatch?.features.find(
     (f) => f.id === focusedFeatureId,
@@ -180,7 +180,7 @@ const UploadInner: React.FC = () => {
       setResult(await uploadChangeset(parsedTags!, diff!));
       // reset inputs but don't reset the changeset tags
       setDiff(undefined);
-      console.log('Uploaded!');
+      console.info('Uploaded!');
     } catch (ex) {
       console.error(ex);
       setError(ex instanceof Error ? ex : new Error(`${ex}`));
@@ -191,7 +191,7 @@ const UploadInner: React.FC = () => {
   function downloadOsc() {
     const xml = createOsmChangeXml(-1, diff!, parsedTags);
     const xmlBlob = new Blob([xml], { type: 'application/xml' });
-    downloadFile(xmlBlob, `${fileName?.split('.')[0]}.osc`);
+    downloadFile(xmlBlob, `${fileName?.split('.', 1)[0]}.osc`);
   }
 
   async function moveNode(feature: OsmPatchFeature, lat: number, lon: number) {
@@ -261,13 +261,13 @@ const UploadInner: React.FC = () => {
         accept=".osc,.osmPatch.geo.json,.json"
         multiple
         onChange={(event) => onFileUpload(event.target.files)}
-        ref={input}
+        ref={inputRef}
       />
       {diff && (
         <button
           type="button"
           onClick={() => {
-            input.current!.value = '';
+            inputRef.current!.value = '';
             setDiff(undefined);
           }}
         >
